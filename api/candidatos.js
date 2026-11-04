@@ -215,9 +215,17 @@ export default async function handler(req, res) {
       return res.status(200).json(result.rows);
 
     } catch (err) {
-      console.error("ERRO GET candidatos:", err);
-      return res.status(500).json({ error: "Erro ao buscar candidatos", details: err.message });
-    }
+  console.error("ERRO POST candidato:", err);
+
+  return res.status(500).json({
+    error: "Erro ao salvar candidato",
+    details: err.message,
+    code: err.code,
+    detail: err.detail,
+    table: err.table,
+    column: err.column
+  });
+}
   }
 
   // ════════════════════════════════════════

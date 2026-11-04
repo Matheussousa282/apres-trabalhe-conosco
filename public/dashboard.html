@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH | Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Cores originais mantidas */
+  --primary: #c4a264;
+  --primary-dark: #080808;
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #cbd5e1;
+  --sidebar-active: rgba(196,162,100,0.15);
+  --sidebar-active-text: #c4a264;
+  --sidebar-hover: rgba(255,255,255,0.06);
+  --bg: #f3f4f6;
+  --border: #e5e7eb;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: #111827;
+}
+
+/* ════════════════════════
+   SIDEBAR
+════════════════════════ */
+.sidebar {
+  width: 235px;
+  height: 100vh;
+  background: var(--sidebar-bg);
+  position: fixed;
+  top: 0; left: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  z-index: 200;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.25);
+}
+
+/* Topo da sidebar com logo/marca */
+.sidebar-brand {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.sidebar-logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-logo span {
+  color: var(--primary);
+}
+
+/* Bloco do usuário logado */
+.sidebar-user {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 8px;
+}
+
+.sidebar-user-label {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 4px;
+}
+
+.sidebar-user-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.sidebar-user-acesso {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 3px;
+}
+
+/* Seção do menu */
+.sidebar-section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.28);
+  padding: 10px 20px 6px;
+  font-weight: 600;
+}
+
+/* Links do menu */
+.menu { flex: 1; overflow-y: auto; padding-bottom: 10px; }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 2px 10px;
+  border-radius: 8px;
+  color: var(--sidebar-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: none;
+  background: none;
+  width: calc(100% - 20px);
+  text-align: left;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.sidebar-link:hover {
+  background: var(--sidebar-hover);
+  color: #fff;
+}
+
+.sidebar-link.active {
+  background: var(--sidebar-active);
+  color: var(--sidebar-active-text);
+  font-weight: 600;
+}
+
+.sidebar-link .link-icon {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Separador */
+.sidebar-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 8px 16px;
+}
+
+/* Botão logout */
+.sidebar-logout {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 8px;
+  color: #fca5a5;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.btn-logout:hover {
+  background: rgba(220, 38, 38, 0.25);
+  border-color: rgba(220, 38, 38, 0.5);
+  color: #fff;
+}
+
+/* ════════════════════════
+   MAIN CONTENT
+════════════════════════ */
+.main {
+  margin-left: 235px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main iframe {
+  width: 100%;
+  height: 100vh;
+  border: none;
+  display: block;
+}
+
+/* ════════════════════════
+   MOBILE
+════════════════════════ */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 300;
+  background: var(--sidebar-bg);
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 150;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .hamburger { display: block; }
+  .overlay.show { display: block; }
+}
+</style>
+</head>
+<body>
+
+<!-- Botão mobile -->
+<button class="hamburger" onclick="toggleSidebar()">☰</button>
+<div class="overlay" id="overlay" onclick="fecharSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+
+  <div class="sidebar-brand">
+    <div class="sidebar-logo">
+      <span>✦</span> RH<span>System</span>
+    </div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="sidebar-user-label">Logado como</div>
+    <div class="sidebar-user-name" id="usuarioLogado">—</div>
+    <div class="sidebar-user-acesso" id="usuarioAcesso"></div>
+  </div>
+
+  <div class="menu">
+    <div class="sidebar-section-label">Recrutamento</div>
+
+    <button class="sidebar-link active" id="link-curriculos"
+      onclick="abrirPagina('curriculos.html', 'link-curriculos')">
+      <span class="link-icon">📄</span> Currículos
+    </button>
+
+    <button class="sidebar-link" id="link-entrevistas"
+      onclick="abrirPagina('entrevistas.html', 'link-entrevistas')">
+      <span class="link-icon">🎯</span> Entrevistas
+    </button>
+
+    <button class="sidebar-link" id="link-aprovados"
+      onclick="abrirPagina('aprovados.html', 'link-aprovados')">
+      <span class="link-icon">✅</span> Aprovados
+    </button>
+
+    <button class="sidebar-link" id="link-reprovados"
+      onclick="abrirPagina('reprovados.html', 'link-reprovados')">
+      <span class="link-icon">❌</span> Reprovados
+    </button>
+
+    <button class="sidebar-link" id="link-arquivados"
+      onclick="abrirPagina('arquivados.html', 'link-arquivados')">
+      <span class="link-icon">🗄️</span> Arquivados
+    </button>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">Configurações</div>
+
+    <button class="sidebar-link" id="link-cadastros"
+      onclick="abrirPagina('cadastros.html', 'link-cadastros')">
+      <span class="link-icon">🗂️</span> Gestão de Cargos
+    </button>
+
+    <button class="sidebar-link" id="link-inst"
+      onclick="abrirPagina('instituicoes-unidades.html', 'link-inst')">
+      <span class="link-icon">🏢</span> Instituições e Unidades
+    </button>
+
+    <!--
+      CONTROLE DE ACESSO:
+      O link "Usuários" só aparece para o usuário "Matheus"
+      (verificado pelo nome salvo no localStorage após login).
+      Veja o bloco de script abaixo para a lógica.
+    -->
+    <button class="sidebar-link" id="link-usuarios" style="display:none;"
+      onclick="abrirPagina('criar-usuario.html', 'link-usuarios')">
+      <span class="link-icon">👥</span> Usuários
+    </button>
+
+    <button class="sidebar-link" id="link-configuracoes" style="display:none;"
+      onclick="abrirPagina('configuracoes.html', 'link-configuracoes')">
+      <span class="link-icon">⚙️</span> Configurações
+    </button>
+  </div>
+
+  <div class="sidebar-logout">
+    <button class="btn-logout" onclick="logout()">
+      <span>🚪</span> Sair da conta
+    </button>
+  </div>
+
+</div>
+
+<!-- Conteúdo principal em iframe -->
+<div class="main">
+  <iframe id="iframeConteudo" src="curriculos.html"></iframe>
+</div>
+
+<script>
+/* ════════════════════════════════════
+   GUARD DE LOGIN
+   ────────────────────────────────────
+   Verifica se há usuário no localStorage.
+   Se não houver, redireciona para login.html.
+   ════════════════════════════════════ */
+const usuarioRaw = localStorage.getItem("usuario");
+if (!usuarioRaw) {
+  window.location.href = "login.html";
+}
+
+const dadosUsuario = JSON.parse(usuarioRaw);
+
+/* Sessão antiga (sem token) → pede login de novo para carregar as permissões */
+if (!dadosUsuario.token) {
+  localStorage.removeItem("usuario");
+  window.location.href = "login.html";
+}
+
+document.getElementById("usuarioLogado").textContent = dadosUsuario.nome;
+
+/* Mostra o alcance do acesso */
+const acessoTotal = dadosUsuario.acesso_total !== false;
+const todosCargos = dadosUsuario.todos_cargos !== false;
+document.getElementById("usuarioAcesso").textContent =
+  (acessoTotal ? "Todas as unidades" : (dadosUsuario.unidades || []).length + " unidade(s)") +
+  " • " +
+  (todosCargos ? "todos os cargos" : (dadosUsuario.cargos || []).length + " cargo(s)");
+
+/* Gerente com acesso restrito não vê as telas de cadastro geral */
+if (!acessoTotal || !todosCargos) {
+  document.getElementById("link-cadastros").style.display = "none";
+  document.getElementById("link-inst").style.display = "none";
+}
+
+/* ════════════════════════════════════
+   CONTROLE DE ACESSO
+   ────────────────────────────────────
+   O link "Usuários" só é exibido para
+   o usuário com nome "Matheus".
+   Adapte a lógica se precisar de roles.
+   ════════════════════════════════════ */
+if (dadosUsuario.nome === "Matheus" && acessoTotal && todosCargos) {
+  document.getElementById("link-usuarios").style.display = "flex";
+  document.getElementById("link-configuracoes").style.display = "flex";
+}
+
+/* ── Troca de página no iframe ── */
+function abrirPagina(pagina, linkId) {
+  // Remove active de todos os links
+  document.querySelectorAll(".sidebar-link").forEach(a => a.classList.remove("active"));
+  // Marca o clicado
+  document.getElementById(linkId).classList.add("active");
+  // Troca o src do iframe
+  document.getElementById("iframeConteudo").src = pagina;
+  // Fecha sidebar no mobile
+  fecharSidebar();
+}
+
+/* ── Logout ── */
+function logout() {
+  localStorage.removeItem("usuario");
+  window.location.href = "login.html";
+}
+
+/* ── Mobile: abrir/fechar sidebar ── */
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("show");
+}
+function fecharSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currículos | RH System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+  --primary: #0f62fe; --primary-hover: #0353e9; --primary-light: #eef3ff;
+  --accent: #ff6b35; --bg: #f5f7fa; --card: #ffffff; --text: #0d1117;
+  --text-secondary: #4a5568; --muted: #8a94a6; --border: #e2e8f0; --border-focus: #0f62fe;
+  --success: #0da868; --success-bg: #e6f7f1; --info-bg: #eef3ff;
+  --warning: #d4a017; --warning-bg: #fef9e7; --danger: #e53e3e; --danger-bg: #fef2f2;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08); --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --radius: 12px; --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+.topbar-brand { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
+.topbar-brand span { color: var(--primary); }
+.topbar-nav { display: flex; gap: 4px; }
+.topbar-nav a { text-decoration: none; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); padding: 7px 14px; border-radius: var(--radius-sm); transition: all .2s; }
+.topbar-nav a:hover { background: var(--bg); color: var(--text); }
+.topbar-nav a.active { background: var(--primary-light); color: var(--primary); }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+/* MAIN */
+.main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+.page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+.page-subtitle { font-size: 14px; color: var(--muted); margin-top: 3px; }
+.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* CARDS */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); position: relative; overflow: hidden; transition: box-shadow .2s, transform .2s; }
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 8px; }
+.card-value { font-size: 32px; font-weight: 700; line-height: 1; font-family: "DM Mono", monospace; }
+.card-icon { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.card-total .card-value, .card-ti .card-value { color: var(--primary); }
+.card-total .card-icon { background: var(--primary-light); }
+.card-ti .card-icon { background: var(--info-bg); }
+.card-adm .card-value { color: var(--success); }
+.card-adm .card-icon { background: var(--success-bg); }
+.card-selecionados .card-value { color: var(--accent); }
+.card-selecionados .card-icon { background: #fff4ef; }
+
+/* FILTROS */
+.filter-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+.filter-panel-header { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 14px; }
+.filtros { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.filtros input, .filtros select { padding: 9px 13px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 13.5px; font-family: inherit; color: var(--text); transition: all .2s; min-width: 160px; flex: 1; }
+.filtros input:focus, .filtros select:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(15,98,254,.12); outline: none; background: #fff; }
+.filtros input::placeholder { color: var(--muted); }
+.filtros select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%236b7280' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 15px; padding-right: 34px; cursor: pointer; }
+.btn-limpar { padding: 9px 16px; border: 1.5px solid var(--border); background: var(--card); border-radius: var(--radius-sm); font-size: 13.5px; font-family: inherit; color: var(--text-secondary); cursor: pointer; font-weight: 500; transition: all .2s; white-space: nowrap; }
+.btn-limpar:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+.filter-count { font-size: 13px; color: var(--muted); margin-top: 10px; }
+.filter-count strong { color: var(--primary); }
+
+/* BOTÕES DE DOWNLOAD */
+.btn-tool { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; font-family: inherit; border: 1.5px solid var(--border); background: var(--card); color: var(--text-secondary); cursor: pointer; transition: all .2s; }
+.btn-tool:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.btn-tool.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn-tool.primary:hover { background: var(--primary-hover); color: #fff; }
+.btn-tool:disabled { opacity: .55; pointer-events: none; }
+
+/* BARRA DE SELEÇÃO */
+.bulk-bar { display: none; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: var(--primary); color: #fff; border-radius: var(--radius); padding: 12px 18px; margin-bottom: 16px; box-shadow: var(--shadow-md); animation: slideUp .2s ease; }
+.bulk-bar.show { display: flex; }
+.bulk-info { font-size: 14px; font-weight: 600; }
+.bulk-actions { display: flex; gap: 8px; }
+.bulk-btn { padding: 7px 14px; border-radius: 7px; border: 1.5px solid rgba(255,255,255,.5); background: transparent; color: #fff; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all .15s; }
+.bulk-btn:hover { background: rgba(255,255,255,.15); }
+.bulk-btn.solid { background: #fff; color: var(--primary); border-color: #fff; }
+.bulk-btn.solid:hover { background: #eef3ff; }
+
+/* PROGRESSO */
+.progress-bar-wrap { display: none; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+.progress-bar-wrap.show { display: block; }
+.progress-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: flex; justify-content: space-between; gap: 10px; }
+.progress-track { height: 7px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 10px; transition: width .3s ease; width: 0%; }
+
+/* TABELA */
+.table-wrapper { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 16px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; text-align: left; color: var(--muted); background: #f8fafc; border-bottom: 1px solid var(--border); white-space: nowrap; user-select: none; cursor: pointer; }
+th:hover { color: var(--text); }
+th.col-check, td.col-check { width: 44px; padding-right: 0; cursor: default; }
+td { padding: 13px 16px; font-size: 13.5px; text-align: left; vertical-align: middle; border-bottom: 1px solid #f0f4f8; }
+td.col-check { padding-right: 0; }
+tbody tr { transition: background .15s; }
+tbody tr:hover { background: #f8fbff; }
+tbody tr.row-marcada { background: #eef3ff; }
+tbody tr:last-child td { border-bottom: none; }
+td:last-child, th:last-child { white-space: nowrap; }
+
+input[type="checkbox"].chk { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; vertical-align: middle; }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600; letter-spacing: .2px; }
+.badge-ti { background: var(--info-bg); color: var(--primary); }
+.badge-adm { background: var(--success-bg); color: var(--success); }
+.badge-outros { background: #fef3c7; color: #92400e; cursor: pointer; border: 1.5px dashed #f59e0b; transition: all .15s; }
+.badge-outros:hover { background: #fde68a; transform: scale(1.04); }
+.badge-costureira { background: #f0fdf4; color: #15803d; cursor: pointer; border: 1.5px dashed #4ade80; transition: all .15s; }
+.badge-costureira:hover { background: #dcfce7; transform: scale(1.04); }
+
+.nome-cell { display: flex; align-items: center; gap: 10px; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #0f62fe, #5b9cf6); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; text-transform: uppercase; }
+.nome-text { font-weight: 500; }
+.email-text { font-size: 12px; color: var(--muted); }
+
+.actions { display: flex; gap: 4px; align-items: center; flex-wrap: nowrap; }
+.btn-action { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 500; text-decoration: none; cursor: pointer; border: none; font-family: inherit; transition: all .15s; white-space: nowrap; }
+.btn-ver { background: var(--primary-light); color: var(--primary); }
+.btn-ver:hover { background: #dde7ff; }
+.btn-download { background: var(--success-bg); color: var(--success); }
+.btn-download:hover { background: #c8f0e0; }
+.btn-selecionar { background: #fff4ef; color: var(--accent); }
+.btn-selecionar:hover { background: #ffe8df; }
+.btn-selecionar.selecionado { background: #ffe8df; font-weight: 600; }
+.btn-editar { background: #f0f4ff; color: #5a67d8; }
+.btn-editar:hover { background: #e0e7ff; }
+.btn-arquivar { background: #fdf4ff; color: #7e22ce; }
+.btn-arquivar:hover { background: #f3e8ff; }
+
+/* MODAIS */
+.modal-edit-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px); }
+.modal-edit-overlay.open { display: flex; }
+.modal-edit-box { background: #fff; color: #0d1117; color-scheme: light; padding: 28px; border-radius: 16px; max-width: 460px; width: 92%; box-shadow: 0 12px 40px rgba(0,0,0,.12); animation: slideUp .25s ease; }
+.edit-field { margin-bottom: 16px; }
+.edit-field label { display: block; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: #8a94a6; margin-bottom: 6px; }
+.edit-field input, .edit-field select { width: 100%; padding: 9px 13px; border-radius: 8px; border: 1.5px solid #e2e8f0; background-color: #f5f7fa; color: #0d1117; font-size: 14px; font-family: inherit; color-scheme: light; transition: border-color .2s, box-shadow .2s; }
+.edit-field input:focus, .edit-field select:focus { border-color: #0f62fe; box-shadow: 0 0 0 3px rgba(15,98,254,.12); outline: none; background-color: #fff; }
+.edit-field select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%236b7280' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 15px; padding-right: 34px; cursor: pointer; }
+.edit-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+.btn-edit-cancel { padding: 9px 18px; border: 1.5px solid #e2e8f0; background: #fff; border-radius: 8px; font-size: 13.5px; font-family: inherit; color: #4a5568; cursor: pointer; font-weight: 500; transition: all .2s; }
+.btn-edit-cancel:hover { border-color: #e53e3e; color: #e53e3e; background: #fef2f2; }
+.btn-edit-save { padding: 9px 22px; border: none; background: #0f62fe; border-radius: 8px; font-size: 13.5px; font-family: inherit; color: #fff; cursor: pointer; font-weight: 600; transition: background .2s; }
+.btn-edit-save:hover { background: #0353e9; }
+.btn-edit-save:disabled { opacity: .5; pointer-events: none; }
+
+.empty-state { padding: 60px 20px; text-align: center; color: var(--muted); }
+.empty-state-icon { font-size: 42px; margin-bottom: 12px; }
+.empty-state-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); }
+.empty-state-desc { font-size: 14px; margin-top: 6px; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(2px); animation: fadeIn .2s ease; }
+.modal-overlay.open { display: flex; }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.modal-box { background: var(--card); padding: 28px; border-radius: 16px; max-width: 580px; width: 92%; position: relative; box-shadow: var(--shadow-lg); animation: slideUp .25s ease; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; gap: 12px; }
+.modal-title { font-size: 18px; font-weight: 700; }
+.modal-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.modal-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: var(--bg); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; transition: all .15s; }
+.modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+.modal-body { font-size: 14px; line-height: 1.7; color: var(--text-secondary); white-space: pre-wrap; background: var(--bg); border-radius: var(--radius-sm); padding: 16px; max-height: 340px; overflow-y: auto; }
+
+/* MODAL EXPORTAR EM LOTE */
+.exp-tabs { display: flex; gap: 4px; background: var(--bg); border-radius: 8px; padding: 4px; margin-bottom: 14px; }
+.exp-tab { flex: 1; padding: 8px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; background: none; color: var(--muted); transition: all .18s; }
+.exp-tab.active { background: var(--primary); color: #fff; }
+.exp-all { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.exp-list { border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 280px; overflow-y: auto; }
+.exp-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f0f4f8; font-size: 13.5px; cursor: pointer; transition: background .12s; }
+.exp-item:last-child { border-bottom: none; }
+.exp-item:hover { background: #f8fbff; }
+.exp-item .exp-nome { flex: 1; font-weight: 500; }
+.exp-item .exp-qtd { font-family: "DM Mono", monospace; font-size: 12px; background: var(--primary-light); color: var(--primary); padding: 2px 9px; border-radius: 12px; font-weight: 600; }
+.exp-opts { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+.exp-foot { margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.exp-resumo { font-size: 13px; color: var(--muted); }
+.exp-resumo strong { color: var(--primary); }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: #1a202c; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13.5px; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 99999; transform: translateY(80px); opacity: 0; transition: all .3s ease; max-width: 340px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--success); }
+.toast.warning { background: var(--warning); }
+.toast.danger { background: var(--danger); }
+
+@media (max-width: 640px) {
+  .topbar-nav { display: none; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+  .filtros input, .filtros select { min-width: 100%; }
+  td:nth-child(4), td:nth-child(5), th:nth-child(4), th:nth-child(5) { display: none; }
+}
+</style>
+<script>
+/* auth-fetch: anexa o token em toda chamada /api/* e volta ao login em 401 */
+(function () {
+  var originalFetch = window.fetch;
+  window.fetch = function (input, init) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    var ehApi = url.indexOf("/api/") === 0 || url.indexOf(location.origin + "/api/") === 0;
+    if (ehApi) {
+      try {
+        var u = JSON.parse(localStorage.getItem("usuario") || "null");
+        if (u && u.token) {
+          init = init || {};
+          var base = init.headers || (typeof input !== "string" && input.headers) || {};
+          var h = new Headers(base);
+          h.set("Authorization", "Bearer " + u.token);
+          init.headers = h;
+        }
+      } catch (e) {}
+    }
+    return originalFetch.call(this, input, init).then(function (res) {
+      if (ehApi && res.status === 401 && url.indexOf("/api/login") === -1) {
+        localStorage.removeItem("usuario");
+        (window.top || window).location.href = "login.html";
+      }
+      return res;
+    });
+  };
+})();
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">RH<span>System</span></div>
+  <nav class="topbar-nav">
+    <a href="curriculos.html" class="active">📄 Currículos</a>
+    <a href="entrevistas.html">🎯 Selecionados</a>
+  </nav>
+  <div class="topbar-actions">
+    <span style="font-size:13px; color:var(--muted); display:flex; align-items:center; gap:8px;">
+      <span id="nomeUsuario" style="font-weight:500;"></span>
+      <span id="tempoSessao" style="font-size:11.5px; background:var(--primary-light); color:var(--primary); padding:2px 8px; border-radius:12px; font-weight:600; font-variant-numeric:tabular-nums;">⏱ 00:00</span>
+    </span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Currículos Recebidos</div>
+      <div class="page-subtitle">Gerencie, filtre e baixe os currículos dos candidatos</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-tool" id="btnExportar" onclick="abrirModalExportar()">📦 Baixar por grupo</button>
+      <button class="btn-tool primary" id="btnBaixarFiltrados" onclick="baixarFiltrados()">⬇ Baixar todos (filtro atual)</button>
+    </div>
+  </div>
+
+  <div class="cards" id="cardsResumo"></div>
+
+  <div class="progress-bar-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span id="progressLabel">Preparando arquivos…</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="filter-panel">
+    <div class="filter-panel-header">🔍 Filtros</div>
+    <div class="filtros">
+      <input type="text" id="filtroNome" placeholder="Buscar por nome…">
+      <input type="text" id="filtroEmail" placeholder="Buscar por e-mail…">
+      <select id="filtroCargo"><option value="">Todos os cargos</option></select>
+      <select id="filtroUnidade"><option value="">Todas as unidades</option></select>
+      <select id="filtroInstituicao"><option value="">Todas as instituições</option></select>
+      <button class="btn-limpar" onclick="limparFiltros()">✕ Limpar</button>
+    </div>
+    <div class="filter-count" id="filtroContagem"></div>
+  </div>
+
+  <!-- Barra de seleção em massa -->
+  <div class="bulk-bar" id="bulkBar">
+    <div class="bulk-info" id="bulkInfo">0 selecionados</div>
+    <div class="bulk-actions">
+      <button class="bulk-btn solid" onclick="baixarMarcados()">⬇ Baixar selecionados (.zip)</button>
+      <button class="bulk-btn" onclick="limparMarcados()">Limpar seleção</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-check"><input type="checkbox" class="chk" id="chkTodos" title="Marcar todos os currículos listados" onchange="marcarTodosVisiveis(this.checked)"></th>
+          <th onclick="ordenarPor('nome')">Candidato ⇅</th>
+          <th onclick="ordenarPor('telefone')">Telefone</th>
+          <th onclick="ordenarPor('instituicao')">Instituição ⇅</th>
+          <th onclick="ordenarPor('unidade')">Unidade ⇅</th>
+          <th onclick="ordenarPor('cargo')">Cargo ⇅</th>
+          <th onclick="ordenarPor('data')">Data ⇅</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaCurriculos"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal Ver Currículo -->
+<div class="modal-overlay" id="modalApresentacao">
+  <div class="modal-box" style="max-width:720px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalNomeCanditado"></div>
+        <div class="modal-subtitle" id="modalCargoCanditado"></div>
+      </div>
+      <button class="modal-close" onclick="fecharModal()">&times;</button>
+    </div>
+    <div style="display:flex;gap:4px;background:#f5f7fa;border-radius:8px;padding:4px;margin-bottom:16px;">
+      <button id="tabApres" onclick="trocarAba('apres')" style="flex:1;padding:7px;border:none;border-radius:6px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;background:#0f62fe;color:#fff;transition:all .18s;">📝 Apresentação</button>
+      <button id="tabArquivo" onclick="trocarAba('arquivo')" style="flex:1;padding:7px;border:none;border-radius:6px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;background:none;color:#8a94a6;transition:all .18s;">📄 Currículo</button>
+    </div>
+    <div id="abaApres"><div class="modal-body" id="conteudoApresentacao"></div></div>
+    <div id="abaArquivo" style="display:none;"><div id="visualizadorArquivo" style="min-height:200px;"></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px;align-items:center;justify-content:flex-end;">
+      <span id="arquivoNomeLabel" style="font-size:12px;color:#8a94a6;"></span>
+      <a id="btnDownloadModal" class="btn-action btn-download" style="text-decoration:none;" download>⬇ Baixar arquivo</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Baixar por grupo -->
+<div class="modal-overlay" id="modalExportar">
+  <div class="modal-box" style="max-width:560px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📦 Baixar currículos por grupo</div>
+        <div class="modal-subtitle">Marque um ou mais grupos e gere um único .zip</div>
+      </div>
+      <button class="modal-close" onclick="fecharModalExportar()">&times;</button>
+    </div>
+    <div class="exp-tabs">
+      <button class="exp-tab active" data-dim="cargo" onclick="expTrocarDim('cargo')">💼 Cargo</button>
+      <button class="exp-tab" data-dim="unidade" onclick="expTrocarDim('unidade')">📍 Unidade</button>
+      <button class="exp-tab" data-dim="instituicao" onclick="expTrocarDim('instituicao')">🏛️ Instituição</button>
+    </div>
+    <label class="exp-all">
+      <input type="checkbox" class="chk" id="expChkTodos" onchange="expMarcarTodos(this.checked)">
+      <span id="expTodosLabel">Marcar todos</span>
+    </label>
+    <div class="exp-list" id="expLista"></div>
+    <label class="exp-opts">
+      <input type="checkbox" class="chk" id="expPastas" checked>
+      Separar em pastas dentro do .zip (uma pasta por grupo)
+    </label>
+    <div class="exp-foot">
+      <div class="exp-resumo" id="expResumo"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-edit-cancel" onclick="fecharModalExportar()">Cancelar</button>
+        <button class="btn-edit-save" id="expBtnBaixar" onclick="expBaixar()">⬇ Baixar .zip</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal-edit-overlay" id="modalEditar">
+  <div class="modal-edit-box">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:17px;font-weight:700;">✏️ Editar Candidato</div>
+        <div style="font-size:13px;color:#8a94a6;margin-top:3px;" id="editNomeLabel">—</div>
+      </div>
+      <button style="width:30px;height:30px;border-radius:8px;border:none;background:#f5f7fa;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8a94a6;" onclick="fecharModalEditar()">×</button>
+    </div>
+    <div class="edit-field">
+      <label>Instituição</label>
+      <select id="editInstituicao" onchange="editCarregarUnidades()"><option value="">Carregando…</option></select>
+    </div>
+    <div class="edit-field">
+      <label>Unidade</label>
+      <select id="editUnidade"><option value="">Selecione a instituição primeiro</option></select>
+    </div>
+    <div class="edit-field">
+      <label>Cargo</label>
+      <select id="editCargo"><option value="">Carregando…</option></select>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-edit-cancel" onclick="fecharModalEditar()">Cancelar</button>
+      <button class="btn-edit-save" id="btnSalvarEdicao" onclick="salvarEdicao()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalhes Cargo -->
+<div class="modal-overlay" id="modalDetalhesCargo" style="z-index:10001;">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="detalhesNome"></div>
+        <div class="modal-subtitle">📋 Detalhes do cargo pretendido</div>
+      </div>
+      <button class="modal-close" onclick="fecharDetalhesCargo()">×</button>
+    </div>
+    <div id="blocoCargosPretendidos" style="margin-bottom:16px;">
+      <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a94a6;margin-bottom:10px;">🎯 Cargos pretendidos</div>
+      <div id="listaCargosPretendidos" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+    </div>
+    <div id="blocoMaquinas" style="display:none;margin-bottom:16px;">
+      <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8a94a6;margin-bottom:10px;">🧵 Máquinas com experiência</div>
+      <div id="listaMaquinas" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+    </div>
+    <div id="blocoSemInfo" style="display:none;padding:20px;text-align:center;color:#8a94a6;background:#f8fafc;border-radius:8px;font-size:14px;">ℹ️ Nenhuma informação adicional cadastrada para este candidato.</div>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+      <button class="btn-edit-cancel" onclick="fecharDetalhesCargo()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Arquivar -->
+<div class="modal-edit-overlay" id="modalArquivar" style="z-index:10002;">
+  <div class="modal-edit-box" style="max-width:480px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:17px;font-weight:700;">🗄️ Arquivar Candidato</div>
+        <div style="font-size:13px;color:#8a94a6;margin-top:3px;" id="arquivarNomeLabel">—</div>
+      </div>
+      <button style="width:30px;height:30px;border-radius:8px;border:none;background:#f5f7fa;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8a94a6;" onclick="fecharModalArquivar()">×</button>
+    </div>
+    <div style="background:#fdf4ff;border:1.5px solid #e9d5ff;border-radius:8px;padding:12px 14px;font-size:13px;color:#6b21a8;margin-bottom:16px;">⚠️ O candidato será arquivado e removido da lista principal. Esta ação fica registrada com seu usuário.</div>
+    <div class="edit-field">
+      <label>Motivo do arquivamento <span style="color:#e53e3e;font-size:11px;">*</span></label>
+      <textarea id="arquivarMotivo" rows="3" placeholder="Ex: Perfil não compatível com a vaga, candidato desistiu…"
+        style="width:100%;padding:9px 13px;border-radius:8px;border:1.5px solid #e2e8f0;background-color:#f5f7fa;color:#0d1117;font-size:14px;font-family:'DM Sans',sans-serif;resize:vertical;color-scheme:light;transition:border-color .2s;outline:none;"
+        onfocus="this.style.borderColor='#0f62fe'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+    </div>
+    <div style="background:#f8fafc;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#8a94a6;margin-bottom:4px;">👤 Arquivado por: <strong id="arquivarUsuario" style="color:#0d1117;">—</strong></div>
+    <div class="edit-actions">
+      <button class="btn-edit-cancel" onclick="fecharModalArquivar()">Cancelar</button>
+      <button onclick="confirmarArquivamento()" style="padding:9px 22px;border:none;background:#7e22ce;border-radius:8px;font-size:13.5px;font-family:'DM Sans',sans-serif;color:#fff;cursor:pointer;font-weight:600;transition:background .2s;" onmouseover="this.style.background='#6b21a8'" onmouseout="this.style.background='#7e22ce'">🗄️ Confirmar arquivamento</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   LOGIN GUARD + CRONÔMETRO
+   ═══════════════════════════════════════════════ */
+const usuario = localStorage.getItem("usuario");
+if (!usuario) { window.location.href = "login.html"; }
+const dadosUsuario = JSON.parse(usuario);
+document.getElementById("nomeUsuario").textContent = dadosUsuario.nome || dadosUsuario.name || usuario;
+
+const _loginTs = parseInt(sessionStorage.getItem("rh_login_ts") || "0");
+if (!_loginTs) sessionStorage.setItem("rh_login_ts", Date.now());
+function _atualizarTimer() {
+  const inicio = parseInt(sessionStorage.getItem("rh_login_ts") || Date.now());
+  const diff = Math.floor((Date.now() - inicio) / 1000);
+  const h = Math.floor(diff / 3600), m = Math.floor((diff % 3600) / 60), s = diff % 60;
+  const pad = n => String(n).padStart(2, "0");
+  const el = document.getElementById("tempoSessao");
+  if (el) el.textContent = h > 0 ? `⏱ ${pad(h)}:${pad(m)}:${pad(s)}` : `⏱ ${pad(m)}:${pad(s)}`;
+}
+_atualizarTimer();
+setInterval(_atualizarTimer, 1000);
+
+/* ═══════════════════════════════════════════════
+   ESTADO GLOBAL
+   ═══════════════════════════════════════════════ */
+let curriculos = [];                       // todos (não aprovados, não arquivados)
+let listaVisivel = [];                     // resultado dos filtros atuais
+let ordenacao = { campo: "data", asc: false };
+const marcados = new Set();                // ids marcados nas caixinhas
+let baixando = false;
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+/* ── Carrega currículos ── */
+async function carregarCurriculos() {
+  const tbody = document.getElementById("listaCurriculos");
+  tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--muted);">Carregando…</td></tr>`;
+  try {
+    const res = await fetch("/api/candidatos");
+    if (!res.ok) {
+      const texto = await res.text();
+      console.error("Erro HTTP", res.status, texto);
+      throw new Error(`HTTP ${res.status}: ${texto}`);
+    }
+    const todos = await res.json();
+    curriculos = todos.filter(c => !c.aprovado);
+    preencherFiltros(curriculos);
+    aplicarFiltros();
+  } catch (e) {
+    console.error("carregarCurriculos:", e);
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">Erro ao carregar currículos</div><div class="empty-state-desc">${esc(e.message)}<br>Verifique o console e a conexão com o banco.</div></div></td></tr>`;
+    atualizarResumo([]);
+  }
+}
+
+/* ── Tabela ── */
+function atualizarTabela(lista) {
+  const tbody = document.getElementById("listaCurriculos");
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-title">Nenhum currículo encontrado</div><div class="empty-state-desc">Tente ajustar os filtros de busca</div></div></td></tr>`;
+    document.getElementById("filtroContagem").innerHTML = `Exibindo <strong>0</strong> de <strong>${curriculos.length}</strong> currículos`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(c => {
+    const iniciais = esc(c.nome.split(" ").slice(0, 2).map(n => n[0]).join(""));
+    const dataBR = new Date(c.data).toLocaleDateString("pt-BR");
+    const isSel = c.selecionado === true;
+    const cargoLower = (c.cargo || "").toLowerCase();
+    const marcado = marcados.has(c.id);
+
+    let badge;
+    if (cargoLower.includes("outro")) {
+      badge = `<span class="badge badge-outros" onclick="abrirDetalhesCargo(${c.id})" title="Clique para ver cargos pretendidos">📋 ${esc(c.cargo)}</span>`;
+    } else if (cargoLower.includes("costurei")) {
+      badge = `<span class="badge badge-costureira" onclick="abrirDetalhesCargo(${c.id})" title="Clique para ver máquinas">🧵 ${esc(c.cargo)}</span>`;
+    } else {
+      badge = `<span class="badge ${c.cargo === "TI" ? "badge-ti" : "badge-adm"}">${esc(c.cargo)}</span>`;
+    }
+
+    return `
+    <tr class="${marcado ? "row-marcada" : ""}" data-id="${c.id}">
+      <td class="col-check"><input type="checkbox" class="chk chk-linha" data-id="${c.id}" ${marcado ? "checked" : ""} onchange="marcarLinha(${c.id}, this.checked)"></td>
+      <td>
+        <div class="nome-cell">
+          <div class="avatar">${iniciais}</div>
+          <div><div class="nome-text">${esc(c.nome)}</div><div class="email-text">${esc(c.email)}</div></div>
+        </div>
+      </td>
+      <td>${esc(c.telefone) || "—"}</td>
+      <td>${esc(c.instituicao)}</td>
+      <td>${esc(c.unidade)}</td>
+      <td>${badge}</td>
+      <td>${dataBR}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-action btn-ver" onclick="abrirModalPorId(${c.id})">👁 Ver</button>
+          <button class="btn-action btn-download" onclick="baixarCurriculo(${c.id})">⬇ CV</button>
+          <button class="btn-action btn-editar" onclick="abrirModalEditar(${c.id})">✏️ Editar</button>
+          <button class="btn-action btn-selecionar ${isSel ? "selecionado" : ""}" onclick="toggleSelecionado(${c.id}, this)">${isSel ? "✅ Sel." : "🎯 Sel."}</button>
+          <button class="btn-action btn-arquivar" onclick="abrirModalArquivar(${c.id})">🗄️ Arq.</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("filtroContagem").innerHTML =
+    `Exibindo <strong>${lista.length}</strong> de <strong>${curriculos.length}</strong> currículos`;
+}
+
+/* ═══════════════════════════════════════════════
+   CAIXINHAS DE SELEÇÃO
+   ═══════════════════════════════════════════════ */
+function marcarLinha(id, valor) {
+  if (valor) marcados.add(id); else marcados.delete(id);
+  const tr = document.querySelector(`tr[data-id="${id}"]`);
+  if (tr) tr.classList.toggle("row-marcada", valor);
+  atualizarBarraSelecao();
+}
+
+/* Marca/desmarca todos os currículos que estão na lista filtrada */
+function marcarTodosVisiveis(valor) {
+  listaVisivel.forEach(c => { if (valor) marcados.add(c.id); else marcados.delete(c.id); });
+  document.querySelectorAll(".chk-linha").forEach(chk => {
+    chk.checked = valor;
+    chk.closest("tr").classList.toggle("row-marcada", valor);
+  });
+  atualizarBarraSelecao();
+}
+
+function limparMarcados() {
+  marcados.clear();
+  document.querySelectorAll(".chk-linha").forEach(chk => {
+    chk.checked = false;
+    chk.closest("tr").classList.remove("row-marcada");
+  });
+  atualizarBarraSelecao();
+}
+
+function atualizarBarraSelecao() {
+  const total = marcados.size;
+  const bar = document.getElementById("bulkBar");
+  bar.classList.toggle("show", total > 0);
+  document.getElementById("bulkInfo").textContent = `${total} currículo${total !== 1 ? "s" : ""} selecionado${total !== 1 ? "s" : ""}`;
+
+  // estado da caixinha "marcar todos" (marcada / indeterminada / vazia)
+  const chkTodos = document.getElementById("chkTodos");
+  const visMarcados = listaVisivel.filter(c => marcados.has(c.id)).length;
+  chkTodos.checked = listaVisivel.length > 0 && visMarcados === listaVisivel.length;
+  chkTodos.indeterminate = visMarcados > 0 && visMarcados < listaVisivel.length;
+}
+
+/* ═══════════════════════════════════════════════
+   DOWNLOAD EM LOTE (ZIP)
+   Os arquivos NÃO vêm na listagem — são buscados
+   um a um em /api/candidatos?arquivo=ID
+   ═══════════════════════════════════════════════ */
+function limparNome(s) {
+  return String(s || "").replace(/[\/\\?%*:|"<>]/g, "-").replace(/\s+/g, " ").trim().slice(0, 90) || "sem-nome";
+}
+
+function mostrarProgresso(label, pct) {
+  const wrap = document.getElementById("progressWrap");
+  wrap.classList.add("show");
+  document.getElementById("progressLabel").textContent = label;
+  document.getElementById("progressPct").textContent = pct + "%";
+  document.getElementById("progressFill").style.width = pct + "%";
+}
+
+function travarBotoes(trava) {
+  ["btnBaixarFiltrados", "btnExportar", "expBtnBaixar"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = trava;
+  });
+}
+
+/*
+  lista     → candidatos a baixar
+  nomeZip   → prefixo do arquivo .zip
+  pastaPor  → "cargo" | "unidade" | "instituicao" | null (sem subpastas)
+*/
+async function baixarLista(lista, nomeZip, pastaPor) {
+  if (baixando) { mostrarToast("Já existe um download em andamento.", "warning"); return; }
+  if (!lista.length) { mostrarToast("Nenhum currículo para baixar.", "warning"); return; }
+  if (typeof JSZip === "undefined") { mostrarToast("Biblioteca ZIP não carregou. Recarregue a página.", "danger"); return; }
+
+  baixando = true;
+  travarBotoes(true);
+
+  const zip = new JSZip();
+  const raiz = zip.folder("curriculos");
+  const usados = new Set();
+  const falhas = [];
+  let ok = 0, feitos = 0, idx = 0;
+
+  mostrarProgresso("Buscando arquivos…", 0);
+
+  async function worker() {
+    while (idx < lista.length) {
+      const c = lista[idx++];
+      try {
+        const res = await fetch(`/api/candidatos?arquivo=${c.id}`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const d = await res.json();
+        const base64 = (d.arquivo || "").split(",")[1];
+        if (!base64) throw new Error("arquivo vazio");
+
+        const nomeOrig = d.arquivo_nome || c.arquivo_nome || "";
+        const ext = nomeOrig.includes(".") ? "." + nomeOrig.split(".").pop().toLowerCase() : ".pdf";
+
+        const pasta = pastaPor ? limparNome(c[pastaPor] || "Sem informação") + "/" : "";
+        const base = pasta + limparNome(`${c.nome} - ${c.cargo}`);
+        let final = base + ext, n = 1;
+        while (usados.has(final.toLowerCase())) { n++; final = `${base} (${n})${ext}`; }
+        usados.add(final.toLowerCase());
+
+        raiz.file(final, base64, { base64: true });
+        ok++;
+      } catch (err) {
+        console.warn("Falha ao baixar", c.nome, err);
+        falhas.push(c.nome);
+      }
+      feitos++;
+      mostrarProgresso(`Buscando arquivos… (${feitos}/${lista.length})`, Math.round((feitos / lista.length) * 85));
+    }
+  }
+
+  try {
+    // 4 downloads em paralelo
+    await Promise.all(Array.from({ length: Math.min(4, lista.length) }, worker));
+
+    if (ok === 0) {
+      mostrarToast("Nenhum arquivo foi encontrado para esses candidatos.", "danger");
+      document.getElementById("progressWrap").classList.remove("show");
+      return;
+    }
+
+    if (falhas.length) {
+      raiz.file("_nao_baixados.txt",
+        "Os currículos abaixo não puderam ser baixados (arquivo ausente ou sem permissão):\n\n" + falhas.join("\n"));
+    }
+
+    mostrarProgresso("Compactando arquivos…", 90);
+    const blob = await zip.generateAsync(
+      { type: "blob", compression: "DEFLATE", compressionOptions: { level: 6 } },
+      meta => mostrarProgresso("Compactando arquivos…", Math.round(90 + meta.percent * 0.1))
+    );
+
+    const dataStr = new Date().toLocaleDateString("pt-BR").replace(/\//g, "-");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${nomeZip}_${dataStr}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+
+    mostrarProgresso(`✅ ${ok} currículo${ok !== 1 ? "s" : ""} baixado${ok !== 1 ? "s" : ""}`, 100);
+    if (falhas.length) {
+      mostrarToast(`${ok} baixados, ${falhas.length} sem arquivo (veja _nao_baixados.txt no zip).`, "warning");
+    } else {
+      mostrarToast(`${ok} currículo${ok !== 1 ? "s" : ""} baixado${ok !== 1 ? "s" : ""}! ✅`, "success");
+    }
+    setTimeout(() => document.getElementById("progressWrap").classList.remove("show"), 3500);
+
+  } catch (err) {
+    console.error("Erro ao gerar ZIP:", err);
+    mostrarToast("Erro ao gerar o arquivo ZIP.", "danger");
+    document.getElementById("progressWrap").classList.remove("show");
+  } finally {
+    baixando = false;
+    travarBotoes(false);
+  }
+}
+
+function baixarMarcados() {
+  const lista = curriculos.filter(c => marcados.has(c.id));
+  baixarLista(lista, "curriculos_selecionados", null);
+}
+
+function baixarFiltrados() {
+  baixarLista(listaVisivel, "curriculos", null);
+}
+
+/* ═══════════════════════════════════════════════
+   MODAL "BAIXAR POR GRUPO"
+   ═══════════════════════════════════════════════ */
+const EXP_ROTULOS = { cargo: "cargos", unidade: "unidades", instituicao: "instituições" };
+let expDim = "cargo";
+const expSel = { cargo: new Set(), unidade: new Set(), instituicao: new Set() };
+
+function expGrupos(dim) {
+  const mapa = {};
+  curriculos.forEach(c => { const k = c[dim] || "Sem informação"; mapa[k] = (mapa[k] || 0) + 1; });
+  return Object.entries(mapa).sort((a, b) => a[0].localeCompare(b[0], "pt-BR"));
+}
+
+function abrirModalExportar() {
+  if (!curriculos.length) { mostrarToast("Nenhum currículo carregado.", "warning"); return; }
+  expRender();
+  document.getElementById("modalExportar").classList.add("open");
+}
+function fecharModalExportar() { document.getElementById("modalExportar").classList.remove("open"); }
+
+function expTrocarDim(dim) {
+  expDim = dim;
+  document.querySelectorAll(".exp-tab").forEach(b => b.classList.toggle("active", b.dataset.dim === dim));
+  expRender();
+}
+
+function expRender() {
+  const grupos = expGrupos(expDim);
+  const sel = expSel[expDim];
+  // descarta seleções que não existem mais
+  [...sel].forEach(k => { if (!grupos.some(g => g[0] === k)) sel.delete(k); });
+
+  document.getElementById("expTodosLabel").textContent = `Marcar todos os ${EXP_ROTULOS[expDim]} (${grupos.length})`;
+  document.getElementById("expLista").innerHTML = grupos.map(([nome, qtd], i) => `
+    <label class="exp-item">
+      <input type="checkbox" class="chk exp-chk" data-i="${i}" ${sel.has(nome) ? "checked" : ""} onchange="expMarcar(${i}, this.checked)">
+      <span class="exp-nome">${esc(nome)}</span>
+      <span class="exp-qtd">${qtd}</span>
+    </label>`).join("");
+  expAtualizarResumo(grupos);
+}
+
+function expMarcar(i, valor) {
+  const nome = expGrupos(expDim)[i][0];
+  if (valor) expSel[expDim].add(nome); else expSel[expDim].delete(nome);
+  expAtualizarResumo();
+}
+
+function expMarcarTodos(valor) {
+  const grupos = expGrupos(expDim);
+  expSel[expDim].clear();
+  if (valor) grupos.forEach(g => expSel[expDim].add(g[0]));
+  document.querySelectorAll(".exp-chk").forEach(c => c.checked = valor);
+  expAtualizarResumo(grupos);
+}
+
+function expListaSelecionada() {
+  const sel = expSel[expDim];
+  return curriculos.filter(c => sel.has(c[expDim] || "Sem informação"));
+}
+
+function expAtualizarResumo(grupos) {
+  grupos = grupos || expGrupos(expDim);
+  const sel = expSel[expDim];
+  const total = expListaSelecionada().length;
+  const chk = document.getElementById("expChkTodos");
+  chk.checked = grupos.length > 0 && sel.size === grupos.length;
+  chk.indeterminate = sel.size > 0 && sel.size < grupos.length;
+  document.getElementById("expResumo").innerHTML =
+    `<strong>${sel.size}</strong> grupo${sel.size !== 1 ? "s" : ""} · <strong>${total}</strong> currículo${total !== 1 ? "s" : ""}`;
+}
+
+function expBaixar() {
+  const lista = expListaSelecionada();
+  if (!lista.length) { mostrarToast("Marque pelo menos um grupo.", "warning"); return; }
+  const pastas = document.getElementById("expPastas").checked;
+  fecharModalExportar();
+  baixarLista(lista, `curriculos_por_${expDim}`, pastas ? expDim : null);
+}
+
+window.addEventListener("click", e => { if (e.target.id === "modalExportar") fecharModalExportar(); });
+
+/* ═══════════════════════════════════════════════
+   VER / BAIXAR INDIVIDUAL
+   ═══════════════════════════════════════════════ */
+async function garantirArquivo(c) {
+  if (c.arquivo) return true;
+  try {
+    const res = await fetch(`/api/candidatos?arquivo=${c.id}`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    c.arquivo = data.arquivo;
+    c.arquivo_nome = data.arquivo_nome || c.arquivo_nome;
+    return !!c.arquivo;
+  } catch (err) {
+    console.warn("Erro ao buscar arquivo:", err);
+    return false;
+  }
+}
+
+async function abrirModalPorId(id) {
+  const c = curriculos.find(x => x.id === id);
+  if (!c) return;
+  await garantirArquivo(c);
+  abrirModal(c);
+}
+
+async function baixarCurriculo(id) {
+  const c = curriculos.find(x => x.id === id);
+  if (!c) return;
+  mostrarToast("Baixando arquivo…");
+  const ok = await garantirArquivo(c);
+  if (!ok || c.arquivo === "#") { mostrarToast("Arquivo não disponível.", "warning"); return; }
+
+  const a = document.createElement("a");
+  a.href = c.arquivo;
+  a.download = `${limparNome(c.nome)}-${c.arquivo_nome || "curriculo"}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/* ── Selecionar candidato (🎯) ── */
+async function toggleSelecionado(id, btn) {
+  const novoValor = !btn.classList.contains("selecionado");
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/candidatos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, acao: "selecionado", valor: novoValor }),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    if (novoValor) {
+      btn.textContent = "✅ Sel.";
+      btn.classList.add("selecionado");
+      mostrarToast("Candidato selecionado! 📱 Mensagem enviada.", "success");
+    } else {
+      btn.textContent = "🎯 Sel.";
+      btn.classList.remove("selecionado");
+      mostrarToast("Candidato removido da seleção.");
+    }
+    const c = curriculos.find(x => x.id === id);
+    if (c) c.selecionado = novoValor;
+    atualizarResumo(listaVisivel);
+  } catch (err) {
+    console.warn("Erro ao selecionar:", err);
+    mostrarToast("Erro ao atualizar seleção.", "danger");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ── Cards de resumo ── */
+function atualizarResumo(lista) {
+  const container = document.getElementById("cardsResumo");
+  const cargosMap = {};
+  lista.forEach(c => { cargosMap[c.cargo] = (cargosMap[c.cargo] || 0) + 1; });
+  const selCount = lista.filter(c => c.selecionado).length;
+  const icones = { "TI": "💻", "Administrativo": "🗂️" };
+
+  container.innerHTML = `
+    <div class="card card-total"><div class="card-icon">📄</div><div class="card-label">Total</div><div class="card-value">${lista.length}</div></div>
+    ${Object.entries(cargosMap).map(([cargo, qtd]) => `
+      <div class="card card-${cargo === "TI" ? "ti" : "adm"}">
+        <div class="card-icon">${icones[cargo] || "📋"}</div>
+        <div class="card-label">${esc(cargo)}</div>
+        <div class="card-value">${qtd}</div>
+      </div>`).join("")}
+    <div class="card card-selecionados"><div class="card-icon">🎯</div><div class="card-label">Selecionados</div><div class="card-value">${selCount}</div></div>`;
+}
+
+/* ── Filtros ── */
+function preencherFiltros(lista) {
+  const campos = { filtroCargo: "cargo", filtroUnidade: "unidade", filtroInstituicao: "instituicao" };
+  const rotulos = { filtroCargo: "Todos os cargos", filtroUnidade: "Todas as unidades", filtroInstituicao: "Todas as instituições" };
+  for (const [id, campo] of Object.entries(campos)) {
+    const sel = document.getElementById(id);
+    const atual = sel.value;
+    sel.innerHTML = `<option value="">${rotulos[id]}</option>` +
+      [...new Set(lista.map(c => c[campo]))].sort((a, b) => String(a).localeCompare(String(b), "pt-BR"))
+        .map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join("");
+    sel.value = atual;
+  }
+}
+
+function aplicarFiltros() {
+  const nome = document.getElementById("filtroNome").value.toLowerCase();
+  const email = document.getElementById("filtroEmail").value.toLowerCase();
+  const cargo = document.getElementById("filtroCargo").value;
+  const unidade = document.getElementById("filtroUnidade").value;
+  const inst = document.getElementById("filtroInstituicao").value;
+
+  let lista = curriculos.filter(c =>
+    c.nome.toLowerCase().includes(nome) &&
+    (c.email || "").toLowerCase().includes(email) &&
+    (!cargo || c.cargo === cargo) &&
+    (!unidade || c.unidade === unidade) &&
+    (!inst || c.instituicao === inst)
+  );
+  lista = ordenarLista(lista);
+  listaVisivel = lista;
+
+  atualizarTabela(lista);
+  atualizarResumo(lista);
+  atualizarBarraSelecao();
+}
+
+function ordenarPor(campo) {
+  if (ordenacao.campo === campo) ordenacao.asc = !ordenacao.asc;
+  else { ordenacao.campo = campo; ordenacao.asc = true; }
+  aplicarFiltros();
+}
+
+function ordenarLista(lista) {
+  return [...lista].sort((a, b) => {
+    let va = a[ordenacao.campo] || "", vb = b[ordenacao.campo] || "";
+    if (ordenacao.campo === "data") { va = new Date(va); vb = new Date(vb); }
+    else { va = va.toString().toLowerCase(); vb = vb.toString().toLowerCase(); }
+    return ordenacao.asc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+}
+
+function limparFiltros() {
+  document.getElementById("filtroNome").value = "";
+  document.getElementById("filtroEmail").value = "";
+  ["filtroCargo", "filtroUnidade", "filtroInstituicao"].forEach(id => { document.getElementById(id).value = ""; });
+  aplicarFiltros();
+}
+
+["filtroNome", "filtroEmail"].forEach(id => document.getElementById(id).addEventListener("input", aplicarFiltros));
+["filtroCargo", "filtroUnidade", "filtroInstituicao"].forEach(id => document.getElementById(id).addEventListener("change", aplicarFiltros));
+
+/* ═══════════════════════════════════════════════
+   MODAL VER
+   ═══════════════════════════════════════════════ */
+const MIME_MAP = {
+  pdf: "application/pdf", doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif", webp: "image/webp", bmp: "image/bmp",
+};
+
+function srcComMime(c) {
+  const ext = (c.arquivo_nome || "").split(".").pop().toLowerCase();
+  const mime = MIME_MAP[ext] || "application/octet-stream";
+  if (c.arquivo && c.arquivo.startsWith("data:")) return `data:${mime};base64,${c.arquivo.split(",")[1]}`;
+  return c.arquivo;
+}
+
+function abrirModal(c) {
+  document.getElementById("modalNomeCanditado").textContent = c.nome;
+  document.getElementById("modalCargoCanditado").textContent = `${c.cargo} • ${c.unidade} • ${c.email}`;
+  document.getElementById("conteudoApresentacao").textContent = c.apresentacao || "Sem apresentação registrada.";
+
+  const btnDl = document.getElementById("btnDownloadModal");
+  const nomeLabel = document.getElementById("arquivoNomeLabel");
+
+  if (c.arquivo && c.arquivo !== "#") {
+    const ext = (c.arquivo_nome || "").split(".").pop().toLowerCase();
+    btnDl.href = srcComMime(c);
+    btnDl.download = c.arquivo_nome || `curriculo-${c.nome}.${ext}`;
+    btnDl.style.display = "inline-flex";
+    nomeLabel.textContent = c.arquivo_nome || "";
+  } else {
+    btnDl.style.display = "none";
+    nomeLabel.textContent = "";
+  }
+
+  document.getElementById("visualizadorArquivo").innerHTML = `
+    <div style="padding:40px;text-align:center;color:var(--muted);">
+      <div style="font-size:32px;margin-bottom:10px;">📄</div>
+      <div style="font-size:13px;">Clique na aba <strong>Currículo</strong> para visualizar o arquivo</div>
+    </div>`;
+
+  window._modalCandidatoAtual = c;
+  trocarAba("apres");
+  document.getElementById("modalApresentacao").classList.add("open");
+}
+
+function trocarAba(aba) {
+  const apres = document.getElementById("abaApres");
+  const arquivo = document.getElementById("abaArquivo");
+  const tabA = document.getElementById("tabApres");
+  const tabB = document.getElementById("tabArquivo");
+
+  if (aba === "apres") {
+    apres.style.display = "block"; arquivo.style.display = "none";
+    tabA.style.background = "#0f62fe"; tabA.style.color = "#fff";
+    tabB.style.background = "none"; tabB.style.color = "#8a94a6";
+    return;
+  }
+
+  apres.style.display = "none"; arquivo.style.display = "block";
+  tabA.style.background = "none"; tabA.style.color = "#8a94a6";
+  tabB.style.background = "#0f62fe"; tabB.style.color = "#fff";
+
+  const c = window._modalCandidatoAtual;
+  const viz = document.getElementById("visualizadorArquivo");
+  if (!c || !c.arquivo || c.arquivo === "#") {
+    viz.innerHTML = `<div style="padding:30px;text-align:center;color:var(--muted);">📎 Nenhum arquivo disponível</div>`;
+    return;
+  }
+
+  const ext = (c.arquivo_nome || "").split(".").pop().toLowerCase();
+  const src = srcComMime(c);
+
+  if (ext === "pdf") {
+    viz.innerHTML = `<embed src="${src}" type="application/pdf" style="width:100%;height:500px;border-radius:8px;border:1px solid var(--border);">`;
+  } else if (["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) {
+    viz.innerHTML = `<img src="${src}" alt="Currículo de ${esc(c.nome)}" style="max-width:100%;border-radius:8px;border:1px solid var(--border);display:block;margin:0 auto;">`;
+  } else if (["doc", "docx"].includes(ext)) {
+    viz.innerHTML = `
+      <div style="padding:30px;text-align:center;color:var(--muted);">
+        <div style="font-size:44px;margin-bottom:14px;">📝</div>
+        <div style="font-size:14px;font-weight:600;color:#4a5568;margin-bottom:6px;">${esc(c.arquivo_nome || "documento.docx")}</div>
+        <div style="font-size:13px;margin-bottom:16px;">Arquivos Word não podem ser visualizados diretamente no navegador.</div>
+        <a href="${src}" download="${esc(c.arquivo_nome || "curriculo." + ext)}" style="display:inline-flex;align-items:center;gap:6px;padding:9px 20px;background:#0f62fe;color:#fff;border-radius:8px;font-size:13.5px;font-weight:600;text-decoration:none;">⬇ Baixar para visualizar</a>
+      </div>`;
+  } else {
+    viz.innerHTML = `
+      <div style="padding:30px;text-align:center;color:var(--muted);">
+        <div style="font-size:44px;margin-bottom:12px;">📎</div>
+        <div style="font-size:14px;font-weight:600;color:#4a5568;">${esc(c.arquivo_nome || "arquivo")}</div>
+        <div style="font-size:13px;margin-top:6px;">Formato não suportado para visualização. Use o botão <strong>Baixar arquivo</strong>.</div>
+      </div>`;
+  }
+}
+
+function fecharModal() { document.getElementById("modalApresentacao").classList.remove("open"); }
+window.addEventListener("click", e => { if (e.target.id === "modalApresentacao") fecharModal(); });
+
+/* ── Toast ── */
+let _toastTimer = null;
+function mostrarToast(msg, tipo = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = `toast ${tipo} show`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove("show"), 3500);
+}
+
+/* ═══════════════════════════════════════════════
+   DETALHES DO CARGO (Outros / Costureira)
+   ═══════════════════════════════════════════════ */
+function abrirDetalhesCargo(id) {
+  const c = curriculos.find(x => x.id === id);
+  if (!c) return;
+
+  document.getElementById("detalhesNome").textContent = c.nome;
+  const blocoCP = document.getElementById("blocoCargosPretendidos");
+  const blocoMaq = document.getElementById("blocoMaquinas");
+  const blocoSem = document.getElementById("blocoSemInfo");
+  const listaCP = document.getElementById("listaCargosPretendidos");
+  const listaMaq = document.getElementById("listaMaquinas");
+
+  blocoCP.style.display = "none"; blocoMaq.style.display = "none"; blocoSem.style.display = "none";
+  listaCP.innerHTML = ""; listaMaq.innerHTML = "";
+
+  let temInfo = false;
+  const ehCostureira = (c.cargo || "").toLowerCase().includes("costurei");
+  const temPretendidos = c.cargos_pretendidos && c.cargos_pretendidos.trim();
+  const maquinasVal = (c.maquinas || "").trim();
+
+  document.querySelector("#modalDetalhesCargo .modal-subtitle").textContent =
+    ehCostureira && !temPretendidos ? "🧵 Máquinas informadas pelo candidato" : "📋 Detalhes do cargo pretendido";
+
+  if (temPretendidos) {
+    temInfo = true;
+    blocoCP.style.display = "block";
+    c.cargos_pretendidos.split(",").map(s => s.trim()).filter(Boolean).forEach(cargo => {
+      listaCP.innerHTML += `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:linear-gradient(135deg,#c4a264,#a8884e);color:#fff;border-radius:20px;font-size:12.5px;font-weight:600;">✦ ${esc(cargo)}</span>`;
+    });
+  }
+
+  if (maquinasVal) {
+    temInfo = true;
+    blocoMaq.style.display = "block";
+    maquinasVal.split(",").map(s => s.trim()).filter(Boolean).forEach(maq => {
+      listaMaq.innerHTML += `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:20px;font-size:12.5px;font-weight:600;">🧵 ${esc(maq)}</span>`;
+    });
+  } else if (ehCostureira || (temPretendidos && c.cargos_pretendidos.toLowerCase().includes("costurei"))) {
+    temInfo = true;
+    blocoMaq.style.display = "block";
+    listaMaq.innerHTML = `<span style="font-size:13px;color:#8a94a6;font-style:italic;">Nenhuma máquina informada pelo candidato.</span>`;
+  }
+
+  if (!temInfo) blocoSem.style.display = "block";
+  document.getElementById("modalDetalhesCargo").classList.add("open");
+}
+function fecharDetalhesCargo() { document.getElementById("modalDetalhesCargo").classList.remove("open"); }
+window.addEventListener("click", e => { if (e.target.id === "modalDetalhesCargo") fecharDetalhesCargo(); });
+
+/* ═══════════════════════════════════════════════
+   ARQUIVAR
+   ═══════════════════════════════════════════════ */
+let arquivandoId = null;
+
+function nomeDoUsuario() {
+  try {
+    const u = JSON.parse(localStorage.getItem("usuario") || "null");
+    if (u) return u.nome || u.name || u.usuario || "—";
+  } catch (e) {}
+  return "—";
+}
+
+function abrirModalArquivar(id) {
+  const c = curriculos.find(x => x.id === id);
+  if (!c) return;
+  arquivandoId = id;
+  document.getElementById("arquivarNomeLabel").textContent = c.nome;
+  document.getElementById("arquivarMotivo").value = "";
+  document.getElementById("arquivarUsuario").textContent = nomeDoUsuario();
+  document.getElementById("modalArquivar").classList.add("open");
+}
+function fecharModalArquivar() {
+  document.getElementById("modalArquivar").classList.remove("open");
+  arquivandoId = null;
+}
+
+async function confirmarArquivamento() {
+  if (!arquivandoId) return;
+  const campo = document.getElementById("arquivarMotivo");
+  const motivo = campo.value.trim();
+  if (!motivo) {
+    campo.focus();
+    campo.style.borderColor = "#e53e3e";
+    mostrarToast("Digite o motivo do arquivamento.", "warning");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/candidatos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: arquivandoId, acao: "arquivar", motivo_arquivamento: motivo, arquivado_por: nomeDoUsuario() }),
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+  } catch (err) {
+    console.warn("Erro ao arquivar:", err);
+    mostrarToast("Erro ao arquivar candidato.", "danger");
+    return;
+  }
+
+  marcados.delete(arquivandoId);
+  curriculos = curriculos.filter(x => x.id !== arquivandoId);
+  fecharModalArquivar();
+  aplicarFiltros();
+  mostrarToast("Candidato arquivado com sucesso! 🗄️", "success");
+}
+window.addEventListener("click", e => { if (e.target.id === "modalArquivar") fecharModalArquivar(); });
+
+/* ═══════════════════════════════════════════════
+   EDITAR  (a API exige acao:"editar" + ids)
+   ═══════════════════════════════════════════════ */
+let editandoId = null;
+
+async function editCarregarSelects() {
+  try {
+    const [resCargos, resInst] = await Promise.all([fetch("/api/cargos"), fetch("/api/instituicoes")]);
+    const cargos = await resCargos.json();
+    const insts = await resInst.json();
+
+    const selCargo = document.getElementById("editCargo");
+    selCargo.innerHTML = '<option value="">Selecione…</option>';
+    cargos.forEach(c => {
+      const inativo = c.ativo === false;
+      selCargo.innerHTML += `<option value="${esc(c.nome)}" data-id="${c.id}">${esc(c.nome)}${inativo ? " (inativo)" : ""}</option>`;
+    });
+
+    const selInst = document.getElementById("editInstituicao");
+    selInst.innerHTML = '<option value="">Selecione…</option>';
+    insts.filter(i => i.ativo !== false).forEach(i => {
+      selInst.innerHTML += `<option value="${esc(i.nome)}" data-id="${i.id}">${esc(i.nome)}</option>`;
+    });
+  } catch (err) {
+    console.warn("Erro ao carregar selects de edição:", err);
+  }
+}
+
+async function editCarregarUnidades() {
+  const selInst = document.getElementById("editInstituicao");
+  const selUnid = document.getElementById("editUnidade");
+  const opt = selInst.options[selInst.selectedIndex];
+  const instId = opt ? opt.dataset.id : null;
+
+  selUnid.innerHTML = '<option value="">Carregando…</option>';
+  selUnid.disabled = true;
+  if (!instId) {
+    selUnid.innerHTML = '<option value="">Selecione a instituição primeiro</option>';
+    return;
+  }
+  try {
+    const res = await fetch(`/api/unidades?instituicao_id=${instId}`);
+    const data = await res.json();
+    selUnid.innerHTML = '<option value="">Selecione a unidade…</option>';
+    data.filter(u => u.ativo !== false).forEach(u => {
+      selUnid.innerHTML += `<option value="${esc(u.nome)}" data-id="${u.id}">${esc(u.nome)}</option>`;
+    });
+    selUnid.disabled = false;
+  } catch (err) {
+    selUnid.innerHTML = '<option value="">Erro ao carregar</option>';
+    console.warn(err);
+  }
+}
+
+async function abrirModalEditar(id) {
+  const c = curriculos.find(x => x.id === id);
+  if (!c) return;
+  editandoId = id;
+  document.getElementById("editNomeLabel").textContent = c.nome;
+
+  await editCarregarSelects();
+  const selInst = document.getElementById("editInstituicao");
+  for (const opt of selInst.options) { if (opt.value === c.instituicao) { opt.selected = true; break; } }
+
+  await editCarregarUnidades();
+  const selUnid = document.getElementById("editUnidade");
+  for (const opt of selUnid.options) { if (opt.value === c.unidade) { opt.selected = true; break; } }
+
+  const selCargo = document.getElementById("editCargo");
+  for (const opt of selCargo.options) { if (opt.value === c.cargo) { opt.selected = true; break; } }
+
+  document.getElementById("modalEditar").classList.add("open");
+}
+function fecharModalEditar() {
+  document.getElementById("modalEditar").classList.remove("open");
+  editandoId = null;
+}
+
+async function salvarEdicao() {
+  if (editandoId === null) return;
+  const c = curriculos.find(x => x.id === editandoId);
+  if (!c) return;
+
+  const selInst = document.getElementById("editInstituicao");
+  const selUnid = document.getElementById("editUnidade");
+  const selCargo = document.getElementById("editCargo");
+  const optInst = selInst.options[selInst.selectedIndex];
+  const optUnid = selUnid.options[selUnid.selectedIndex];
+  const optCargo = selCargo.options[selCargo.selectedIndex];
+
+  const inst_id = optInst && optInst.dataset.id;
+  const unidade_id = optUnid && optUnid.dataset.id;
+  const cargo_id = optCargo && optCargo.dataset.id;
+
+  if (!inst_id || !unidade_id || !cargo_id) {
+    mostrarToast("Preencha todos os campos.", "warning");
+    return;
+  }
+
+  const btn = document.getElementById("btnSalvarEdicao");
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/candidatos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: editandoId, acao: "editar",
+        cargo_id: Number(cargo_id), inst_id: Number(inst_id), unidade_id: Number(unidade_id),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "HTTP " + res.status);
+    }
+    c.instituicao = optInst.value;
+    c.unidade = optUnid.value;
+    c.cargo = optCargo.value;
+    fecharModalEditar();
+    preencherFiltros(curriculos);
+    aplicarFiltros();
+    mostrarToast("Candidato atualizado! ✅", "success");
+  } catch (err) {
+    console.warn("Erro ao salvar edição:", err);
+    mostrarToast("Erro ao salvar: " + err.message, "danger");
+  } finally {
+    btn.disabled = false;
+  }
+}
+window.addEventListener("click", e => { if (e.target.id === "modalEditar") fecharModalEditar(); });
+
+/* ── Logout ── */
+function logout() {
+  localStorage.removeItem("usuario");
+  window.location.href = "login.html";
+}
+
+/* ── Inicializa ── */
+carregarCurriculos();
+</script>
+</body>
+</html>

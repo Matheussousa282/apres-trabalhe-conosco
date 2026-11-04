@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | RH System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── CORES ORIGINAIS mantidas: preto → dourado ── */
+:root {
+  --primary: #c4a264;
+  --primary-dark: #080808;
+  --primary-hover: #b08d50;
+  --text: #2e2e2e;
+  --muted: #6b7280;
+  --border: #d1d5db;
+  --border-focus: #c4a264;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #000000 0%, #c59845 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Decoração de fundo */
+body::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 60% 40%, rgba(196,162,100,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255,255,255,0.97);
+  border-radius: 16px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+  overflow: hidden;
+  position: relative;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── HEADER ── */
+.card-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 36px 30px 28px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brilho decorativo no header */
+.card-header::after {
+  content: "";
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+
+.header-icon {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 14px;
+}
+
+.card-header h1 {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.card-header p {
+  color: rgba(255,255,255,0.75);
+  font-size: 13.5px;
+  margin-top: 6px;
+}
+
+/* ── BODY ── */
+.card-body { padding: 30px; }
+
+.field { margin-bottom: 18px; }
+
+label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 7px;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap .input-icon {
+  position: absolute;
+  left: 13px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+input {
+  width: 100%;
+  padding: 11px 14px 11px 38px;
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  background: #fafafa;
+  color: var(--text);
+  transition: all 0.2s;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--border-focus);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(196,162,100,0.18);
+}
+
+input::placeholder { color: #b0b7c3; }
+
+/* Toggle senha */
+.toggle-senha {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  cursor: pointer; font-size: 15px;
+  color: var(--muted); padding: 2px;
+  transition: color 0.2s;
+}
+.toggle-senha:hover { color: var(--primary); }
+
+/* ── BOTÃO ── */
+.btn-submit {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--primary) 0%, #a8884e 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: "DM Sans", sans-serif;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 6px;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, #8a6e3a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(196,162,100,0.4);
+}
+
+.btn-submit:active { transform: translateY(0); }
+
+.btn-submit.loading { opacity: 0.75; pointer-events: none; }
+
+/* ── MENSAGEM DE ERRO ── */
+.error-box {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: var(--danger-bg);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 13px;
+  margin-top: 14px;
+  font-size: 13.5px;
+  color: var(--danger);
+  animation: shake 0.35s ease;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+
+.error-box.show { display: flex; }
+
+/* ── LINKS / AVISOS ── */
+.link-alt {
+  display: block; width: 100%; text-align: center; margin-top: 16px;
+  background: none; border: none; cursor: pointer;
+  font-family: "DM Sans", sans-serif; font-size: 13.5px; font-weight: 600;
+  color: #8a6e3a; transition: color 0.2s;
+}
+.link-alt:hover { color: var(--primary); text-decoration: underline; }
+
+.ok-box {
+  display: none; align-items: center; gap: 8px;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+  padding: 10px 13px; margin-bottom: 18px;
+  font-size: 13.5px; color: #16a34a;
+}
+.ok-box.show { display: flex; }
+
+.hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+.view { display: none; }
+.view.show { display: block; }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #f0f0f0;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="header-icon">🔐</div>
+    <h1 id="tituloCard">Área Administrativa</h1>
+    <p id="subtituloCard">Faça login para acessar o dashboard</p>
+  </div>
+
+  <div class="card-body">
+    <!-- ═══════ TELA: LOGIN ═══════ -->
+    <div class="view show" id="viewLogin">
+    <div class="ok-box" id="okMsg"><span>✅</span><span id="okText"></span></div>
+
+    <form id="loginForm" autocomplete="off">
+
+      <div class="field">
+        <label for="nome">Usuário</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="nome" placeholder="Digite seu usuário" required autocomplete="username">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="senha">Senha</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="senha" placeholder="••••••••" required autocomplete="current-password">
+          <button type="button" class="toggle-senha" onclick="toggleSenha()" id="toggleBtn" title="Mostrar senha">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnEntrar">Entrar</button>
+
+      <div class="error-box" id="errorMsg">
+        <span>⚠️</span>
+        <span id="errorText">Usuário ou senha inválidos</span>
+      </div>
+    </form>
+
+    <button type="button" class="link-alt" onclick="mostrarCriar()">🔑 Primeiro acesso? Criar minha senha</button>
+    </div>
+
+    <!-- ═══════ TELA: CRIAR SENHA ═══════ -->
+    <div class="view" id="viewCriar">
+    <form id="criarForm" autocomplete="off">
+
+      <div class="field">
+        <label for="cNome">Usuário</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="cNome" placeholder="Usuário informado pelo administrador" required autocomplete="off">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="cCodigo">Código de primeiro acesso</label>
+        <div class="input-wrap">
+          <span class="input-icon">🎫</span>
+          <input type="text" id="cCodigo" placeholder="6 dígitos" inputmode="numeric" maxlength="6" required autocomplete="off">
+        </div>
+        <div class="hint">O código é gerado pelo administrador quando seu usuário é criado.</div>
+      </div>
+
+      <div class="field">
+        <label for="cSenha">Nova senha</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔑</span>
+          <input type="password" id="cSenha" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+          <button type="button" class="toggle-senha" onclick="toggleCriar()" id="toggleCriarBtn" title="Mostrar senha">👁️</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="cSenha2">Confirmar senha</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="cSenha2" placeholder="Repita a senha" required autocomplete="new-password">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnCriarSenha">Criar senha</button>
+
+      <div class="error-box" id="cErrorMsg">
+        <span>⚠️</span>
+        <span id="cErrorText"></span>
+      </div>
+    </form>
+
+    <button type="button" class="link-alt" onclick="mostrarLogin()">← Voltar para o login</button>
+    </div>
+
+    <div class="footer">
+      © 2026 • Sistema de Recrutamento — Excelência Lingerie
+    </div>
+  </div>
+</div>
+
+<script>
+/* Toggle mostrar/ocultar senha */
+function toggleSenha() {
+  const input = document.getElementById("senha");
+  const btn = document.getElementById("toggleBtn");
+  if (input.type === "password") {
+    input.type = "text";
+    btn.textContent = "🙈";
+  } else {
+    input.type = "password";
+    btn.textContent = "👁️";
+  }
+}
+
+/* ── Alternar entre as telas ── */
+function mostrarCriar() {
+  document.getElementById("viewLogin").classList.remove("show");
+  document.getElementById("viewCriar").classList.add("show");
+  document.getElementById("tituloCard").textContent = "Criar minha senha";
+  document.getElementById("subtituloCard").textContent = "Use o código fornecido pelo administrador";
+  document.getElementById("cErrorMsg").classList.remove("show");
+}
+
+function mostrarLogin(msgOk, nomeUsuario) {
+  document.getElementById("viewCriar").classList.remove("show");
+  document.getElementById("viewLogin").classList.add("show");
+  document.getElementById("tituloCard").textContent = "Área Administrativa";
+  document.getElementById("subtituloCard").textContent = "Faça login para acessar o dashboard";
+
+  const ok = document.getElementById("okMsg");
+  if (msgOk) {
+    document.getElementById("okText").textContent = msgOk;
+    ok.classList.add("show");
+  } else {
+    ok.classList.remove("show");
+  }
+  if (nomeUsuario) {
+    document.getElementById("nome").value = nomeUsuario;
+    document.getElementById("senha").value = "";
+    document.getElementById("senha").focus();
+  }
+}
+
+function toggleCriar() {
+  const a = document.getElementById("cSenha");
+  const b = document.getElementById("cSenha2");
+  const btn = document.getElementById("toggleCriarBtn");
+  const mostrar = a.type === "password";
+  a.type = b.type = mostrar ? "text" : "password";
+  btn.textContent = mostrar ? "🙈" : "👁️";
+}
+
+/* ── Criar senha (primeiro acesso) ── */
+document.getElementById("criarForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nome   = document.getElementById("cNome").value.trim();
+  const codigo = document.getElementById("cCodigo").value.trim();
+  const senha  = document.getElementById("cSenha").value;
+  const senha2 = document.getElementById("cSenha2").value;
+  const errorBox  = document.getElementById("cErrorMsg");
+  const errorText = document.getElementById("cErrorText");
+  const btn = document.getElementById("btnCriarSenha");
+
+  errorBox.classList.remove("show");
+
+  if (senha.length < 6) {
+    errorText.textContent = "A senha precisa ter no mínimo 6 caracteres";
+    errorBox.classList.add("show");
+    return;
+  }
+  if (senha !== senha2) {
+    errorText.textContent = "As senhas não conferem";
+    errorBox.classList.add("show");
+    return;
+  }
+
+  btn.classList.add("loading");
+  btn.textContent = "Salvando…";
+
+  try {
+    const res = await fetch("/api/primeiro-acesso", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, codigo, senha })
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch {}
+
+    if (!res.ok) {
+      errorText.textContent = data.error || "Não foi possível criar a senha";
+      errorBox.classList.add("show");
+      return;
+    }
+
+    document.getElementById("criarForm").reset();
+    mostrarLogin("Senha criada com sucesso! Agora é só entrar.", nome);
+
+  } catch (err) {
+    console.error(err);
+    errorText.textContent = "Erro de conexão. Tente novamente.";
+    errorBox.classList.add("show");
+  } finally {
+    btn.classList.remove("loading");
+    btn.textContent = "Criar senha";
+  }
+});
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const nome = document.getElementById("nome").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  const errorBox = document.getElementById("errorMsg");
+  const errorText = document.getElementById("errorText");
+  const btn = document.getElementById("btnEntrar");
+
+  // Esconde erro anterior
+  errorBox.classList.remove("show");
+  btn.classList.add("loading");
+  btn.textContent = "Entrando…";
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, senha })
+    });
+
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch {
+      errorText.textContent = "Erro no servidor";
+      errorBox.classList.add("show");
+      return;
+    }
+
+    if (!res.ok) {
+      errorText.textContent = data.error || "Login inválido";
+      errorBox.classList.add("show");
+      return;
+    }
+
+    localStorage.setItem("usuario", JSON.stringify(data.usuario));
+    window.location.href = "dashboard.html";
+
+  } catch (err) {
+    console.error(err);
+    errorText.textContent = "Erro de conexão. Tente novamente.";
+    errorBox.classList.add("show");
+  } finally {
+    btn.classList.remove("loading");
+    btn.textContent = "Entrar";
+  }
+});
+</script>
+
+</body>
+</html>

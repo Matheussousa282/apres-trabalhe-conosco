@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RH | Usuários e Acessos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+/* auth-fetch.js
+   Anexa o token do usuário logado em toda chamada para /api/*
+   e volta para o login se o servidor responder 401 (sessão inválida).
+   (embutido no <head> de cada página interna) */
+(function () {
+  var originalFetch = window.fetch;
+
+  window.fetch = function (input, init) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    var ehApi = url.indexOf("/api/") === 0 || url.indexOf(location.origin + "/api/") === 0;
+
+    if (ehApi) {
+      try {
+        var u = JSON.parse(localStorage.getItem("usuario") || "null");
+        if (u && u.token) {
+          init = init || {};
+          var base = init.headers || (typeof input !== "string" && input.headers) || {};
+          var h = new Headers(base);
+          h.set("Authorization", "Bearer " + u.token);
+          init.headers = h;
+        }
+      } catch (e) {}
+    }
+
+    return originalFetch.call(this, input, init).then(function (res) {
+      if (ehApi && res.status === 401 && url.indexOf("/api/login") === -1) {
+        localStorage.removeItem("usuario");
+        (window.top || window).location.href = "login.html";
+      }
+      return res;
+    });
+  };
+})();
+</script>
+<style>
+:root {
+  --primary: #c4a264;
+  --primary-hover: #b08d50;
+  --primary-soft: rgba(196,162,100,0.10);
+  --dark: #0f172a;
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #111827;
+  --text-secondary: #4a5568;
+  --muted: #6b7280;
+  --success: #16a34a;
+  --success-bg: #f0fdf4;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --warning: #b45309;
+  --warning-bg: #fffbeb;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+  --radius: 14px;
+  --radius-sm: 9px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 32px 20px 56px;
+}
+
+.container { max-width: 880px; margin: 0 auto; }
+
+/* ── CABEÇALHO ── */
+.page-head { text-align: center; margin-bottom: 24px; }
+.page-head h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; }
+.page-head p  { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+/* ── ABAS ── */
+.tabs {
+  display: flex; justify-content: center; gap: 6px;
+  background: #e9ebef; padding: 5px; border-radius: 12px;
+  width: fit-content; margin: 0 auto 24px;
+}
+.tab {
+  border: none; background: transparent; cursor: pointer;
+  padding: 10px 22px; border-radius: 9px;
+  font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted);
+  transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+}
+.tab:hover { color: var(--text); }
+.tab.active { background: #fff; color: var(--text); box-shadow: var(--shadow-sm); }
+.tab .count {
+  background: var(--primary-soft); color: var(--primary-hover);
+  font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+}
+
+.screen { display: none; animation: fadeIn 0.25s ease; }
+.screen.show { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── CARD ── */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.card-header {
+  padding: 18px 24px; border-bottom: 1px solid var(--border); background: #fafafa;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 15px; font-weight: 700;
+}
+.card-body { padding: 28px; }
+
+/* ── SEÇÕES DO FORMULÁRIO ── */
+.section { margin-bottom: 30px; }
+.section:last-of-type { margin-bottom: 0; }
+.section-title {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.7px; color: var(--muted); margin-bottom: 16px;
+}
+form#formUsuario { counter-reset: sec; }
+.section { counter-increment: sec; }
+.section-title .num::before { content: counter(sec); }
+.section-title .num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--dark); color: var(--primary);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11.5px; letter-spacing: 0;
+}
+.section-title::before, .section-title::after {
+  content: ""; height: 1px; background: var(--border); flex: 1; max-width: 120px;
+}
+
+.edit-banner {
+  display: none; align-items: center; justify-content: center; gap: 8px;
+  margin-bottom: 22px; padding: 11px 14px; font-size: 13.5px; font-weight: 600;
+  background: var(--warning-bg); border: 1px solid #fde68a; color: var(--warning);
+  border-radius: var(--radius-sm);
+}
+
+/* ── CAMPOS ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+label.lbl {
+  display: block; font-size: 12.5px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.input-wrap { position: relative; }
+.input-wrap .input-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  font-size: 14px; pointer-events: none;
+}
+.input-wrap input[type="text"], .input-wrap input[type="password"] {
+  width: 100%; padding: 11px 40px 11px 38px; font-size: 14px; font-family: inherit;
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: #fafafa; color: var(--text); outline: none; transition: all 0.2s;
+}
+.input-wrap input:focus {
+  border-color: var(--primary); background: #fff;
+  box-shadow: 0 0 0 3px rgba(196,162,100,0.18);
+}
+.input-wrap input:disabled { background: #eef0f3; color: var(--muted); cursor: not-allowed; }
+.input-wrap input::placeholder { color: #b0b7c3; }
+.toggle-senha {
+  position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; font-size: 15px; color: var(--muted);
+}
+
+/* ── NÍVEL DE ACESSO (cartões) ── */
+.opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .opcoes { grid-template-columns: 1fr; } }
+.opcao {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 6px; padding: 22px 16px; cursor: pointer;
+  border: 2px solid var(--border); border-radius: var(--radius); background: #fafafa;
+  transition: all 0.2s;
+}
+.opcao:hover { border-color: var(--primary); }
+.opcao input { position: absolute; opacity: 0; pointer-events: none; }
+.opcao .ico { font-size: 26px; }
+.opcao strong { font-size: 14.5px; }
+.opcao small { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.opcao .marca {
+  position: absolute; top: 10px; right: 10px; width: 20px; height: 20px;
+  border-radius: 50%; border: 2px solid var(--border-strong); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: transparent; transition: all 0.2s;
+}
+.opcao.sel { border-color: var(--primary); background: var(--primary-soft); }
+.opcao.sel .marca { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ── UNIDADES ── */
+.unid-toolbar {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  justify-content: center; margin-bottom: 16px;
+}
+.unid-toolbar .busca { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+.unid-toolbar .busca input {
+  width: 100%; padding: 9px 12px 9px 34px; font-size: 13.5px; font-family: inherit;
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: #fff; outline: none;
+}
+.unid-toolbar .busca input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(196,162,100,0.18); }
+.unid-toolbar .busca span { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+
+.btn-ghost {
+  background: #fff; border: 1.5px solid var(--border-strong); color: var(--text-secondary);
+  padding: 8px 14px; border-radius: var(--radius-sm); font-size: 12.5px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--primary); color: var(--text); }
+
+.contador {
+  text-align: center; font-size: 13px; font-weight: 600; color: var(--primary-hover);
+  margin-bottom: 16px;
+}
+
+.inst-card {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: #fff; margin-bottom: 14px; overflow: hidden;
+}
+.inst-head {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 13px 16px; background: #f8fafc; border-bottom: 1px solid var(--border);
+  cursor: pointer; position: relative;
+}
+.inst-head .nome { font-size: 14.5px; font-weight: 700; }
+.inst-head .qtd {
+  font-size: 11.5px; font-weight: 700; color: var(--muted);
+  background: #e9ebef; padding: 2px 9px; border-radius: 10px;
+}
+.inst-head .qtd.on { background: var(--primary-soft); color: var(--primary-hover); }
+.tag-inativa { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+.chips {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px; padding: 16px;
+}
+.chip {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px 14px; text-align: center; cursor: pointer; user-select: none;
+  border: 1.5px solid var(--border); border-radius: 10px; background: #fafafa;
+  font-size: 13.5px; font-weight: 500; transition: all 0.18s;
+}
+.chip:hover { border-color: var(--primary); }
+.chip.sel { border-color: var(--primary); background: var(--primary-soft); font-weight: 600; }
+
+/* Caixinha de marcar customizada */
+.chk { position: relative; width: 20px; height: 20px; flex-shrink: 0; display: inline-block; }
+.chk input { position: absolute; inset: 0; opacity: 0; cursor: pointer; margin: 0; }
+.chk .box {
+  position: absolute; inset: 0; border: 2px solid var(--border-strong); border-radius: 6px;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; pointer-events: none;
+}
+.chk .box::after {
+  content: ""; width: 5px; height: 10px; border: solid #fff; border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0); margin-top: -2px; transition: transform 0.15s;
+}
+.chk input:checked + .box { background: var(--primary); border-color: var(--primary); }
+.chk input:checked + .box::after { transform: rotate(45deg) scale(1); }
+.chk input:indeterminate + .box { background: var(--primary); border-color: var(--primary); }
+.chk input:indeterminate + .box::after {
+  width: 10px; height: 0; border-width: 0 0 2.5px 0; transform: none; margin-top: 0;
+}
+.chk input:focus-visible + .box { box-shadow: 0 0 0 3px rgba(196,162,100,0.35); }
+
+.vazio { padding: 28px; text-align: center; color: var(--muted); font-size: 13.5px; }
+
+/* ── BOTÕES ── */
+.acoes { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 30px; }
+.btn-submit {
+  width: 100%; max-width: 340px; padding: 13px; border: none; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, #a8884e 100%); color: #fff;
+  font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s;
+}
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(196,162,100,0.4); }
+.btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-cancelar {
+  display: none; background: none; border: none; color: var(--muted);
+  font-size: 13.5px; font-weight: 600; font-family: inherit; cursor: pointer;
+}
+.btn-cancelar:hover { color: var(--text); }
+
+.result-msg {
+  display: none; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 500;
+  margin-top: 18px;
+}
+.result-msg.show { display: flex; }
+.result-msg.success { background: var(--success-bg); color: var(--success); border: 1px solid #bbf7d0; }
+.result-msg.error   { background: var(--danger-bg);  color: var(--danger);  border: 1px solid #fecaca; }
+
+/* ── LISTA ── */
+.lista-top { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: center; }
+.lista-top .busca { position: relative; width: 100%; max-width: 360px; }
+.lista-top input {
+  width: 100%; padding: 10px 12px 10px 36px; font-size: 14px; font-family: inherit;
+  border: 1.5px solid var(--border-strong); border-radius: var(--radius-sm); background: #fafafa; outline: none;
+}
+.lista-top input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(196,162,100,0.18); }
+.lista-top .busca span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; }
+
+.tabela-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  padding: 11px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--muted); background: #f8fafc;
+  border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap;
+}
+td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #f0f4f8; vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fbfaf7; }
+
+.user-cell { display: flex; align-items: center; gap: 11px; }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--dark); color: var(--primary);
+  display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.user-cell small { display: block; color: var(--muted); font-size: 11.5px; }
+
+.senha-cell { display: flex; align-items: center; gap: 8px; }
+.senha-display { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: var(--muted); }
+.btn-toggle-senha { background: none; border: none; cursor: pointer; font-size: 14px; color: var(--muted); }
+
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11.5px;
+  font-weight: 700; white-space: nowrap;
+}
+.badge-total   { background: var(--success-bg); color: var(--success); }
+.badge-unidade { background: var(--warning-bg); color: var(--warning); }
+.unid-mini { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.unid-mini span {
+  font-size: 11px; background: #f1f3f6; color: var(--text-secondary);
+  padding: 2px 8px; border-radius: 6px;
+}
+
+.btn-editar {
+  background: #fff; border: 1.5px solid var(--border-strong); border-radius: 8px;
+  padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  font-family: inherit; color: var(--text-secondary); transition: all 0.2s; white-space: nowrap;
+}
+.btn-editar:hover { border-color: var(--primary); color: var(--primary-hover); }
+.date-cell { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+
+.hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+.banner-codigo {
+  display: none; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 18px; padding: 14px 18px; text-align: center;
+  background: var(--success-bg); border: 1px solid #bbf7d0; color: var(--success);
+  border-radius: var(--radius); font-size: 14px;
+}
+.banner-codigo.show { display: flex; }
+.banner-codigo .cod {
+  font-family: monospace; font-size: 22px; font-weight: 700; letter-spacing: 4px;
+  background: #fff; border: 1.5px dashed var(--success); border-radius: 8px; padding: 4px 14px;
+}
+.banner-codigo button { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--success); }
+
+.pendente { display: flex; flex-direction: column; gap: 3px; }
+.pendente .tag {
+  align-self: flex-start; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px;
+  background: var(--warning-bg); color: var(--warning);
+}
+.pendente .cod { font-family: monospace; font-size: 13px; letter-spacing: 2px; color: var(--text-secondary); }
+.acoes-linha { display: flex; gap: 6px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="page-head">
+    <h1>👥 Usuários e Acessos</h1>
+    <p>Crie usuários e defina quais instituições e unidades cada um pode acessar.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabLista" onclick="mostrarTela('lista')">📋 Usuários <span class="count" id="countUsuarios">0</span></button>
+    <button class="tab" id="tabForm" onclick="novoUsuario()">➕ <span id="tabFormTexto">Novo usuário</span></button>
+  </div>
+
+  <!-- ════════ TELA: LISTA ════════ -->
+  <div class="screen show" id="telaLista">
+    <div class="banner-codigo" id="bannerCodigo"></div>
+    <div class="card">
+      <div class="lista-top">
+        <div class="busca">
+          <span>🔎</span>
+          <input type="text" id="buscaUsuario" placeholder="Buscar usuário…" oninput="renderUsuarios()">
+        </div>
+      </div>
+      <div class="tabela-wrap">
+        <table>
+          <thead>
+            <tr><th>Usuário</th><th>Senha</th><th>Acesso</th><th>Criado em</th><th></th></tr>
+          </thead>
+          <tbody id="listaUsuarios">
+            <tr><td colspan="5" class="vazio">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ TELA: FORMULÁRIO ════════ -->
+  <div class="screen" id="telaForm">
+    <div class="card">
+      <div class="card-header"><span>🔐</span><span id="tituloForm">Novo usuário</span></div>
+      <div class="card-body">
+
+        <div class="edit-banner" id="editBanner"></div>
+
+        <form id="formUsuario" autocomplete="off">
+
+          <!-- 1. DADOS -->
+          <div class="section">
+            <div class="section-title"><span class="num"></span> Dados de login</div>
+            <div class="grid-2">
+              <div>
+                <label class="lbl" for="nome">Nome de usuário</label>
+                <div class="input-wrap">
+                  <span class="input-icon">👤</span>
+                  <input type="text" id="nome" placeholder="Ex: joao.silva" autocomplete="off" required>
+                </div>
+              </div>
+              <div>
+                <label class="lbl" for="senha">Senha</label>
+                <div class="input-wrap">
+                  <span class="input-icon">🔑</span>
+                  <input type="password" id="senha" placeholder="Opcional" autocomplete="new-password">
+                  <button type="button" class="toggle-senha" onclick="toggleSenha()" id="btnOlho">👁️</button>
+                </div>
+                <div class="hint" id="hintSenha">Deixe em branco para o usuário criar a própria senha no primeiro acesso (você recebe um código).</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. NÍVEL -->
+          <div class="section">
+            <div class="section-title"><span class="num"></span> Acesso às unidades</div>
+            <div class="opcoes">
+              <label class="opcao sel" id="opTotal">
+                <input type="radio" name="acesso" value="total" checked>
+                <span class="marca">✓</span>
+                <span class="ico">🌐</span>
+                <strong>Acesso total</strong>
+                <small>Vê todas as instituições e unidades. Indicado para RH geral e administração.</small>
+              </label>
+              <label class="opcao" id="opUnidade">
+                <input type="radio" name="acesso" value="unidade">
+                <span class="marca">✓</span>
+                <span class="ico">🏬</span>
+                <strong>Somente unidades selecionadas</strong>
+                <small>Indicado para gerentes. Vê apenas currículos, entrevistas, aprovados, reprovados e arquivados das unidades liberadas.</small>
+              </label>
+            </div>
+          </div>
+
+          <!-- 3. UNIDADES -->
+          <div class="section" id="secUnidades" style="display:none;">
+            <div class="section-title"><span class="num"></span> Unidades liberadas</div>
+
+            <div class="unid-toolbar">
+              <div class="busca">
+                <span>🔎</span>
+                <input type="text" id="buscaUnidade" placeholder="Filtrar unidade…" oninput="filtrarUnidades()">
+              </div>
+              <button type="button" class="btn-ghost" onclick="marcarTodas(true)">Marcar todas</button>
+              <button type="button" class="btn-ghost" onclick="marcarTodas(false)">Limpar</button>
+            </div>
+
+            <div class="contador" id="contUnid">0 unidade(s) selecionada(s)</div>
+
+            <div id="arvoreUnidades"><div class="vazio">Carregando…</div></div>
+          </div>
+
+          <!-- CARGOS -->
+          <div class="section" id="secCargos">
+            <div class="section-title"><span class="num"></span> Cargos que pode ver</div>
+            <div class="opcoes">
+              <label class="opcao sel" id="opCargoTodos">
+                <input type="radio" name="cargos_modo" value="todos" checked>
+                <span class="marca">✓</span>
+                <span class="ico">📂</span>
+                <strong>Todos os cargos</strong>
+                <small>Vê currículos de qualquer cargo.</small>
+              </label>
+              <label class="opcao" id="opCargoSel">
+                <input type="radio" name="cargos_modo" value="selecionados">
+                <span class="marca">✓</span>
+                <span class="ico">🎯</span>
+                <strong>Somente cargos selecionados</strong>
+                <small>Vê apenas currículos, entrevistas, aprovados, reprovados e arquivados dos cargos marcados.</small>
+              </label>
+            </div>
+
+            <div id="boxCargos" style="display:none; margin-top:22px;">
+              <div class="unid-toolbar">
+                <div class="busca">
+                  <span>🔎</span>
+                  <input type="text" id="buscaCargo" placeholder="Filtrar cargo…" oninput="filtrarCargos()">
+                </div>
+                <button type="button" class="btn-ghost" onclick="selecionarCargosLoja()" title="Operador de caixa, Outros cargos não especificados, Vendedor(a), Serviços Gerais e Fiscal de Loja">⭐ Cargos de loja</button>
+                <button type="button" class="btn-ghost" onclick="marcarTodosCargos(true)">Marcar todos</button>
+                <button type="button" class="btn-ghost" onclick="marcarTodosCargos(false)">Limpar</button>
+              </div>
+              <div class="contador" id="contCargos">0 cargo(s) selecionado(s)</div>
+              <div class="inst-card">
+                <div class="chips" id="gradeCargos"><div class="vazio" style="grid-column:1/-1;">Carregando…</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="acoes">
+            <button type="submit" class="btn-submit" id="btnCriar">Criar usuário</button>
+            <button type="button" class="btn-cancelar" id="btnCancelar" onclick="cancelarEdicao()">Cancelar edição</button>
+          </div>
+
+          <div class="result-msg" id="resultMsg">
+            <span id="resultIcon"></span><span id="resultText"></span>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* GUARD DE LOGIN */
+const usuario = localStorage.getItem("usuario");
+if (!usuario) { window.location.href = "login.html"; }
+
+/* ── Estado ── */
+let catalogo     = [];          // [{id, nome, ativo, unidades:[{id,nome,ativo}]}]
+let mapaUnidades = {};          // id -> "Instituição › Unidade"
+let selecionadas = new Set();   // ids de unidades marcadas
+let listaAtual   = [];
+let editandoId   = null;
+let cargosCat    = [];          // [{id, nome, ativo}]
+let mapaCargos   = {};          // id -> nome
+let cargosSel    = new Set();   // ids de cargos marcados
+
+function esc(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+/* ── Telas ── */
+function mostrarTela(qual) {
+  const form = qual === "form";
+  document.getElementById("telaLista").classList.toggle("show", !form);
+  document.getElementById("telaForm").classList.toggle("show", form);
+  document.getElementById("tabLista").classList.toggle("active", !form);
+  document.getElementById("tabForm").classList.toggle("active", form);
+}
+
+function novoUsuario() {
+  if (editandoId) cancelarEdicao(); else mostrarTela("form");
+}
+
+/* ── Senha ── */
+function toggleSenha() {
+  const input = document.getElementById("senha");
+  const btn = document.getElementById("btnOlho");
+  if (input.type === "password") { input.type = "text"; btn.textContent = "🙈"; }
+  else                           { input.type = "password"; btn.textContent = "👁️"; }
+}
+function toggleSenhaCelula(btn) {
+  const display = btn.previousElementSibling;
+  if (btn.dataset.visible === "1") {
+    display.textContent = "••••••••"; btn.textContent = "👁️"; btn.dataset.visible = "0";
+  } else {
+    display.textContent = btn.dataset.senha; btn.textContent = "🙈"; btn.dataset.visible = "1";
+  }
+}
+
+/* ════════════ NÍVEL DE ACESSO ════════════ */
+function modoAcesso() { return document.querySelector('input[name="acesso"]:checked').value; }
+
+function atualizarModo() {
+  const restrito = modoAcesso() === "unidade";
+  document.getElementById("secUnidades").style.display = restrito ? "block" : "none";
+  document.getElementById("opTotal").classList.toggle("sel", !restrito);
+  document.getElementById("opUnidade").classList.toggle("sel", restrito);
+}
+document.querySelectorAll('input[name="acesso"]').forEach(r => r.addEventListener("change", atualizarModo));
+
+/* ════════════ UNIDADES (instituição → unidades) ════════════ */
+async function carregarCatalogo() {
+  const box = document.getElementById("arvoreUnidades");
+  try {
+    const [rI, rU] = await Promise.all([fetch("/api/instituicoes"), fetch("/api/unidades")]);
+    if (!rI.ok || !rU.ok) throw new Error();
+    const insts = await rI.json();
+    const unids = await rU.json();
+
+    catalogo = insts.map(i => ({
+      id: i.id, nome: i.nome, ativo: i.ativo !== false,
+      unidades: unids.filter(u => Number(u.instituicao_id) === Number(i.id))
+                     .map(u => ({ id: Number(u.id), nome: u.nome, ativo: u.ativo !== false }))
+    })).filter(i => i.unidades.length);
+
+    mapaUnidades = {};
+    catalogo.forEach(i => i.unidades.forEach(u => { mapaUnidades[u.id] = `${i.nome} › ${u.nome}`; }));
+    renderArvore();
+  } catch {
+    box.innerHTML = '<div class="vazio" style="color:var(--danger);">Erro ao carregar instituições e unidades</div>';
+  }
+}
+
+function renderArvore() {
+  const box = document.getElementById("arvoreUnidades");
+  if (!catalogo.length) {
+    box.innerHTML = '<div class="vazio">Nenhuma unidade cadastrada ainda</div>';
+    atualizarContador();
+    return;
+  }
+
+  box.innerHTML = catalogo.map(i => `
+    <div class="inst-card" data-card="${i.id}">
+      <label class="inst-head">
+        <span class="chk"><input type="checkbox" data-inst="${i.id}"><span class="box"></span></span>
+        <span class="nome">🏢 ${esc(i.nome)}${i.ativo ? "" : ' <span class="tag-inativa">(inativa)</span>'}</span>
+        <span class="qtd" id="qtd-${i.id}">0/${i.unidades.length}</span>
+      </label>
+      <div class="chips">
+        ${i.unidades.map(u => `
+          <label class="chip ${selecionadas.has(u.id) ? "sel" : ""}" data-chip="${u.id}" data-nome="${esc(u.nome.toLowerCase())}">
+            <span class="chk"><input type="checkbox" data-unid="${u.id}" ${selecionadas.has(u.id) ? "checked" : ""}><span class="box"></span></span>
+            <span>${esc(u.nome)}${u.ativo ? "" : ' <span class="tag-inativa">(inativa)</span>'}</span>
+          </label>`).join("")}
+      </div>
+    </div>`).join("");
+
+  box.querySelectorAll("input[data-unid]").forEach(cb => cb.addEventListener("change", () => {
+    const id = Number(cb.dataset.unid);
+    cb.checked ? selecionadas.add(id) : selecionadas.delete(id);
+    cb.closest(".chip").classList.toggle("sel", cb.checked);
+    atualizarPais();
+  }));
+
+  box.querySelectorAll("input[data-inst]").forEach(cb => cb.addEventListener("change", () => {
+    const inst = catalogo.find(i => String(i.id) === cb.dataset.inst);
+    inst.unidades.forEach(u => {
+      cb.checked ? selecionadas.add(u.id) : selecionadas.delete(u.id);
+      const chip = box.querySelector(`[data-chip="${u.id}"]`);
+      chip.classList.toggle("sel", cb.checked);
+      chip.querySelector("input").checked = cb.checked;
+    });
+    atualizarPais();
+  }));
+
+  atualizarPais();
+  filtrarUnidades();
+}
+
+function atualizarPais() {
+  catalogo.forEach(i => {
+    const cb = document.querySelector(`input[data-inst="${i.id}"]`);
+    if (!cb) return;
+    const n = i.unidades.filter(u => selecionadas.has(u.id)).length;
+    cb.checked = n === i.unidades.length && n > 0;
+    cb.indeterminate = n > 0 && n < i.unidades.length;
+    const q = document.getElementById(`qtd-${i.id}`);
+    q.textContent = `${n}/${i.unidades.length}`;
+    q.classList.toggle("on", n > 0);
+  });
+  atualizarContador();
+}
+
+function atualizarContador() {
+  document.getElementById("contUnid").textContent = `${selecionadas.size} unidade(s) selecionada(s)`;
+}
+
+function marcarTodas(marcar) {
+  catalogo.forEach(i => i.unidades.forEach(u => marcar ? selecionadas.add(u.id) : selecionadas.delete(u.id)));
+  renderArvore();
+}
+
+function filtrarUnidades() {
+  const termo = document.getElementById("buscaUnidade").value.trim().toLowerCase();
+  document.querySelectorAll(".inst-card").forEach(card => {
+    let visiveis = 0;
+    card.querySelectorAll(".chip").forEach(chip => {
+      const ok = !termo || chip.dataset.nome.includes(termo);
+      chip.style.display = ok ? "" : "none";
+      if (ok) visiveis++;
+    });
+    card.style.display = visiveis ? "" : "none";
+  });
+}
+
+/* ════════════ CARGOS ════════════ */
+function modoCargos() { return document.querySelector('input[name="cargos_modo"]:checked').value; }
+
+function atualizarModoCargos() {
+  const sel = modoCargos() === "selecionados";
+  document.getElementById("boxCargos").style.display = sel ? "block" : "none";
+  document.getElementById("opCargoTodos").classList.toggle("sel", !sel);
+  document.getElementById("opCargoSel").classList.toggle("sel", sel);
+}
+document.querySelectorAll('input[name="cargos_modo"]').forEach(r => r.addEventListener("change", atualizarModoCargos));
+
+async function carregarCargos() {
+  const grade = document.getElementById("gradeCargos");
+  try {
+    const res = await fetch("/api/cargos");
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    cargosCat = data.map(c => ({ id: Number(c.id), nome: c.nome, ativo: c.ativo !== false }));
+    mapaCargos = {};
+    cargosCat.forEach(c => { mapaCargos[c.id] = c.nome; });
+    renderCargos();
+  } catch {
+    grade.innerHTML = '<div class="vazio" style="grid-column:1/-1;color:var(--danger);">Erro ao carregar cargos</div>';
+  }
+}
+
+function renderCargos() {
+  const grade = document.getElementById("gradeCargos");
+  if (!cargosCat.length) {
+    grade.innerHTML = '<div class="vazio" style="grid-column:1/-1;">Nenhum cargo cadastrado ainda</div>';
+    atualizarContCargos();
+    return;
+  }
+  grade.innerHTML = cargosCat.map(c => `
+    <label class="chip ${cargosSel.has(c.id) ? "sel" : ""}" data-cargo="${c.id}" data-nome="${esc(c.nome.toLowerCase())}">
+      <span class="chk"><input type="checkbox" data-cid="${c.id}" ${cargosSel.has(c.id) ? "checked" : ""}><span class="box"></span></span>
+      <span>${esc(c.nome)}${c.ativo ? "" : ' <span class="tag-inativa">(inativo)</span>'}</span>
+    </label>`).join("");
+
+  grade.querySelectorAll("input[data-cid]").forEach(cb => cb.addEventListener("change", () => {
+    const id = Number(cb.dataset.cid);
+    cb.checked ? cargosSel.add(id) : cargosSel.delete(id);
+    cb.closest(".chip").classList.toggle("sel", cb.checked);
+    atualizarContCargos();
+  }));
+  atualizarContCargos();
+  filtrarCargos();
+}
+
+function atualizarContCargos() {
+  document.getElementById("contCargos").textContent = `${cargosSel.size} cargo(s) selecionado(s)`;
+}
+
+function marcarTodosCargos(marcar) {
+  cargosCat.forEach(c => marcar ? cargosSel.add(c.id) : cargosSel.delete(c.id));
+  renderCargos();
+}
+
+function filtrarCargos() {
+  const termo = document.getElementById("buscaCargo").value.trim().toLowerCase();
+  document.querySelectorAll("#gradeCargos .chip").forEach(chip => {
+    chip.style.display = (!termo || chip.dataset.nome.includes(termo)) ? "" : "none";
+  });
+}
+
+/* Atalho: marca os cargos de loja (compara ignorando acentos e maiúsculas) */
+function normalizar(t) {
+  return String(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+function selecionarCargosLoja() {
+  const alvos = ["operador de caixa", "outros cargos", "vendedor", "servicos gerais", "fiscal de loja"];
+  const achados = cargosCat.filter(c => alvos.some(a => normalizar(c.nome).includes(a)));
+  achados.forEach(c => cargosSel.add(c.id));
+  renderCargos();
+  if (achados.length < alvos.length) {
+    alert(`Foram marcados ${achados.length} de ${alvos.length} cargos de loja.\nConfira se os nomes estão cadastrados e marque manualmente os que faltarem.`);
+  }
+}
+
+/* ════════════ LISTA DE USUÁRIOS ════════════ */
+function badgeCargos(u) {
+  if (u.todos_cargos !== false) return '<div class="unid-mini"><span>📂 Todos os cargos</span></div>';
+  const nomes = (u.cargos || []).map(id => mapaCargos[id] || `Cargo #${id}`);
+  const curtos = nomes.slice(0, 3).map(n => `<span>🎯 ${esc(n)}</span>`).join("");
+  const mais = nomes.length > 3 ? `<span>+${nomes.length - 3}</span>` : "";
+  return `<div class="unid-mini">${curtos}${mais}</div>`;
+}
+
+function badgeAcesso(u) {
+  return badgeUnidades(u) + badgeCargos(u);
+}
+
+function badgeUnidades(u) {
+  if (u.acesso_total !== false) return '<span class="badge badge-total">🌐 Todas as unidades</span>';
+  const nomes = (u.unidades || []).map(id => mapaUnidades[id] || `Unidade #${id}`);
+  const curtos = nomes.slice(0, 3).map(n => `<span>${esc(n.split(" › ").pop())}</span>`).join("");
+  const mais = nomes.length > 3 ? `<span>+${nomes.length - 3}</span>` : "";
+  return `<span class="badge badge-unidade">🏬 ${nomes.length} unidade(s)</span><div class="unid-mini">${curtos}${mais}</div>`;
+}
+
+function renderUsuarios() {
+  const termo = (document.getElementById("buscaUsuario")?.value || "").trim().toLowerCase();
+  const itens = listaAtual.filter(u => !termo || u.nome.toLowerCase().includes(termo));
+  document.getElementById("countUsuarios").textContent = listaAtual.length;
+
+  document.getElementById("listaUsuarios").innerHTML = itens.length
+    ? itens.map(u => `
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="avatar">${esc(u.nome.charAt(0).toUpperCase())}</div>
+              <div><strong>${esc(u.nome)}</strong><small>ID ${u.id}</small></div>
+            </div>
+          </td>
+          <td>
+            ${u.pendente
+              ? `<div class="pendente"><span class="tag">⏳ Aguardando criar senha</span>${u.codigo ? `<span class="cod">Código: ${esc(u.codigo)}</span>` : '<span class="cod" style="letter-spacing:0;">Código bloqueado — gere outro</span>'}</div>`
+              : `<div class="senha-cell">
+                  <span class="senha-display">••••••••</span>
+                  <button class="btn-toggle-senha" data-visible="0" data-senha="${esc(u.senha)}" onclick="toggleSenhaCelula(this)">👁️</button>
+                </div>`}
+          </td>
+          <td>${badgeAcesso(u)}</td>
+          <td class="date-cell">${new Date(u.criado_em).toLocaleDateString("pt-BR")}</td>
+          <td>
+            <div class="acoes-linha">
+              <button class="btn-editar" onclick="editarUsuario(${u.id})">✏️ Editar acesso</button>
+              <button class="btn-editar" data-nome="${esc(u.nome)}" onclick="redefinirSenha(${u.id}, this.dataset.nome)">🔄 ${u.pendente ? "Novo código" : "Redefinir senha"}</button>
+            </div>
+          </td>
+        </tr>`).join("")
+    : `<tr><td colspan="5" class="vazio">${listaAtual.length ? "Nenhum usuário encontrado" : "Nenhum usuário cadastrado"}</td></tr>`;
+}
+
+async function listarUsuarios() {
+  try {
+    const res = await fetch("/api/usuarios");
+    if (!res.ok) throw new Error();
+    listaAtual = await res.json();
+    renderUsuarios();
+  } catch {
+    document.getElementById("listaUsuarios").innerHTML =
+      `<tr><td colspan="5" class="vazio" style="color:var(--danger);">Erro ao carregar usuários</td></tr>`;
+  }
+}
+
+/* ════════════ CÓDIGO DE PRIMEIRO ACESSO ════════════ */
+function mostrarCodigo(nome, codigo) {
+  const b = document.getElementById("bannerCodigo");
+  b.innerHTML = `
+    <span>✅ Código de primeiro acesso de <strong>${esc(nome)}</strong>:</span>
+    <span class="cod">${esc(codigo)}</span>
+    <span style="font-size:12.5px;">Passe ao usuário: na tela de login, "Criar minha senha".</span>
+    <button type="button" title="Fechar" onclick="this.parentElement.classList.remove('show')">✕</button>`;
+  b.classList.add("show");
+}
+
+async function redefinirSenha(id, nome) {
+  if (!confirm(`Redefinir a senha de "${nome}"?\nA senha atual deixa de funcionar e um novo código será gerado.`)) return;
+  try {
+    const res = await fetch("/api/usuarios", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, redefinir: true })
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || "Erro ao redefinir senha"); return; }
+    await listarUsuarios();
+    mostrarCodigo(nome, data.codigo);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch {
+    alert("Erro de conexão. Tente novamente.");
+  }
+}
+
+/* ════════════ EDIÇÃO ════════════ */
+function editarUsuario(id) {
+  const u = listaAtual.find(x => x.id === id);
+  if (!u) return;
+  editandoId = id;
+
+  document.getElementById("tituloForm").textContent = "Editar acesso";
+  document.getElementById("tabFormTexto").textContent = "Editando usuário";
+  const banner = document.getElementById("editBanner");
+  banner.textContent = `✏️ Editando: ${u.nome}`;
+  banner.style.display = "flex";
+
+  const nome = document.getElementById("nome");
+  nome.value = u.nome; nome.disabled = true;
+  const senha = document.getElementById("senha");
+  senha.value = ""; senha.required = false;
+  senha.placeholder = "Deixe em branco para manter";
+  document.getElementById("hintSenha").style.display = "none";
+
+  const total = u.acesso_total !== false;
+  document.querySelector(`input[name="acesso"][value="${total ? "total" : "unidade"}"]`).checked = true;
+  selecionadas = new Set((u.unidades || []).map(Number));
+  document.getElementById("buscaUnidade").value = "";
+  renderArvore();
+  atualizarModo();
+
+  const todosCg = u.todos_cargos !== false;
+  document.querySelector(`input[name="cargos_modo"][value="${todosCg ? "todos" : "selecionados"}"]`).checked = true;
+  cargosSel = new Set((u.cargos || []).map(Number));
+  document.getElementById("buscaCargo").value = "";
+  renderCargos();
+  atualizarModoCargos();
+
+  document.getElementById("btnCriar").textContent = "Salvar alterações";
+  document.getElementById("btnCancelar").style.display = "block";
+  document.getElementById("resultMsg").classList.remove("show");
+  mostrarTela("form");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function resetarFormulario() {
+  editandoId = null;
+  document.getElementById("formUsuario").reset();
+  document.getElementById("tituloForm").textContent = "Novo usuário";
+  document.getElementById("tabFormTexto").textContent = "Novo usuário";
+  document.getElementById("editBanner").style.display = "none";
+  document.getElementById("nome").disabled = false;
+  const senha = document.getElementById("senha");
+  senha.required = false; senha.placeholder = "Opcional";
+  document.getElementById("hintSenha").style.display = "";
+  document.getElementById("buscaUnidade").value = "";
+  selecionadas = new Set();
+  renderArvore();
+  atualizarModo();
+  cargosSel = new Set();
+  document.getElementById("buscaCargo").value = "";
+  renderCargos();
+  atualizarModoCargos();
+  document.getElementById("btnCriar").textContent = "Criar usuário";
+  document.getElementById("btnCancelar").style.display = "none";
+}
+
+function cancelarEdicao() {
+  resetarFormulario();
+  document.getElementById("resultMsg").classList.remove("show");
+  mostrarTela("lista");
+}
+
+/* ════════════ SALVAR ════════════ */
+document.getElementById("formUsuario").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const btn  = document.getElementById("btnCriar");
+  const msg  = document.getElementById("resultMsg");
+  const icon = document.getElementById("resultIcon");
+  const text = document.getElementById("resultText");
+
+  msg.classList.remove("show", "success", "error");
+
+  const restrito = modoAcesso() === "unidade";
+  if (restrito && selecionadas.size === 0) {
+    icon.textContent = "⚠️";
+    text.textContent = "Selecione ao menos uma unidade para este usuário.";
+    msg.classList.add("show", "error");
+    return;
+  }
+
+  const cargosRestritos = modoCargos() === "selecionados";
+  if (cargosRestritos && cargosSel.size === 0) {
+    icon.textContent = "⚠️";
+    text.textContent = "Selecione ao menos um cargo para este usuário.";
+    msg.classList.add("show", "error");
+    return;
+  }
+
+  const eraEdicao = !!editandoId;
+  btn.textContent = eraEdicao ? "Salvando…" : "Criando…";
+  btn.disabled = true;
+
+  const payload = {
+    acesso_total: !restrito,
+    unidades: restrito ? [...selecionadas] : [],
+    todos_cargos: !cargosRestritos,
+    cargos: cargosRestritos ? [...cargosSel] : []
+  };
+
+  try {
+    let res;
+    if (eraEdicao) {
+      payload.id = editandoId;
+      const s = document.getElementById("senha").value;
+      if (s) payload.senha = s;
+      res = await fetch("/api/usuarios", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    } else {
+      payload.nome  = document.getElementById("nome").value.trim();
+      payload.senha = document.getElementById("senha").value;
+      res = await fetch("/api/usuarios", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    }
+
+    const data = await res.json();
+
+    if (res.ok) {
+      const nomeCriado = payload.nome;
+      resetarFormulario();
+      await listarUsuarios();
+      mostrarTela("lista");
+      if (data.codigo) mostrarCodigo(nomeCriado, data.codigo);
+    } else {
+      icon.textContent = "⚠️";
+      text.textContent = data.error || "Erro ao salvar usuário";
+      msg.classList.add("show", "error");
+    }
+  } catch {
+    icon.textContent = "⚠️";
+    text.textContent = "Erro de conexão. Tente novamente.";
+    msg.classList.add("show", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editandoId ? "Salvar alterações" : "Criar usuário";
+  }
+});
+
+/* ── Logout ── */
+function logout() {
+  localStorage.removeItem("usuario");
+  window.location.href = "login.html";
+}
+
+/* Catálogo primeiro (nomes das unidades na lista), depois usuários */
+(async () => { await Promise.all([carregarCatalogo(), carregarCargos()]); await listarUsuarios(); })();
+</script>
+
+</body>
+</html>

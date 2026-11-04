@@ -15,7 +15,7 @@ import crypto from "crypto";
 const SECRET =
   process.env.AUTH_SECRET ||
   process.env.DATABASE_URL ||
-  process.env.DATABASE_URL_RH ||
+  process.env.DATABASE_URL_APRES ||
   "";
 
 let estruturaPromise = null;

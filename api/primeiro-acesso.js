@@ -8,7 +8,7 @@ import { Pool } from "pg";
 import { garantirEstrutura } from "./_acesso.js";
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || process.env.DATABASE_URL_RH,
+  connectionString: process.env.DATABASE_URL || process.env.DATABASE_URL_APRES,
   ssl: { rejectUnauthorized: false },
 });
 

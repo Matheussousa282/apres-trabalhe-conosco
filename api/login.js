@@ -5,7 +5,7 @@ const { Pool } = pkg;
 
 const connectionString =
   process.env.DATABASE_URL ||
-  process.env.DATABASE_URL_RH;
+  process.env.DATABASE_URL_APRES;
 
 if (!connectionString) {
   throw new Error("DATABASE_URL não configurada");

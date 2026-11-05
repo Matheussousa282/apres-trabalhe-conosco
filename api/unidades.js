@@ -18,6 +18,8 @@ export default async function handler(req, res) {
     }
 
     // LISTAR
+    // Formulário público (sem token) ou ?ativo=true: somente ativas
+    // (e de instituições ativas). Telas de gestão: todas.
     if (method === "GET") {
       const { instituicao_id } = req.query;
 
@@ -42,6 +44,9 @@ export default async function handler(req, res) {
       if (acesso && !acesso.total) {
         params.push(acesso.unidades);
         where.push(`u.id = ANY($${params.length}::int[])`);
+      }
+      if (!acesso || req.query.ativo === "true") {
+        where.push("u.ativo = true AND i.ativo = true");
       }
       if (where.length) query += " WHERE " + where.join(" AND ");
 
@@ -69,25 +74,25 @@ export default async function handler(req, res) {
 
     // EDITAR / ATIVAR / INATIVAR
     if (method === "PUT") {
-  const { id, nome, ativo } = req.body;
+      const { id, nome, ativo } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: "ID obrigatório" });
-  }
+      if (!id) {
+        return res.status(400).json({ error: "ID obrigatório" });
+      }
 
-  await pool.query(
-    `
-    UPDATE unidades
-    SET
-      nome = COALESCE($1, nome),
-      ativo = COALESCE($2, ativo)
-    WHERE id = $3
-    `,
-    [nome, ativo, id]
-  );
+      await pool.query(
+        `
+        UPDATE unidades
+        SET
+          nome = COALESCE($1, nome),
+          ativo = COALESCE($2, ativo)
+        WHERE id = $3
+        `,
+        [nome, ativo, id]
+      );
 
-  return res.json({ success: true });
-}
+      return res.json({ success: true });
+    }
 
     return res.status(405).json({ error: "Método não permitido" });
 

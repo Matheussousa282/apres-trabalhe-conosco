@@ -17,17 +17,21 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "Sem permissão" });
     }
 
-    // LISTAR TODAS
+    // LISTAR
+    // Formulário público (sem token) ou ?ativo=true: somente ativas.
+    // Telas de gestão (com token): todas, para permitir reativar.
     if (method === "GET") {
       const restrito = acesso && !acesso.total;
-      const result = restrito
-        ? await pool.query(
-            `SELECT id, nome, ativo FROM instituicoes
-             WHERE id IN (SELECT instituicao_id FROM unidades WHERE id = ANY($1::int[]))
-             ORDER BY nome`,
-            [acesso.unidades]
-          )
-        : await pool.query("SELECT id, nome, ativo FROM instituicoes ORDER BY nome");
+      const somenteAtivos = !acesso || req.query.ativo === "true";
+
+      const result = await pool.query(
+        `SELECT id, nome, ativo FROM instituicoes
+         WHERE ($1::int[] IS NULL
+                OR id IN (SELECT instituicao_id FROM unidades WHERE id = ANY($1::int[])))
+           AND ($2::boolean = false OR ativo = true)
+         ORDER BY nome`,
+        [restrito ? acesso.unidades : null, somenteAtivos]
+      );
       return res.status(200).json(result.rows);
     }
 
@@ -49,25 +53,25 @@ export default async function handler(req, res) {
 
     // EDITAR / ATIVAR / INATIVAR
     if (method === "PUT") {
-  const { id, nome, ativo } = req.body;
+      const { id, nome, ativo } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: "ID obrigatório" });
-  }
+      if (!id) {
+        return res.status(400).json({ error: "ID obrigatório" });
+      }
 
-  await pool.query(
-    `
-    UPDATE instituicoes
-    SET
-      nome = COALESCE($1, nome),
-      ativo = COALESCE($2, ativo)
-    WHERE id = $3
-    `,
-    [nome, ativo, id]
-  );
+      await pool.query(
+        `
+        UPDATE instituicoes
+        SET
+          nome = COALESCE($1, nome),
+          ativo = COALESCE($2, ativo)
+        WHERE id = $3
+        `,
+        [nome, ativo, id]
+      );
 
-  return res.json({ success: true });
-}
+      return res.json({ success: true });
+    }
 
     return res.status(405).json({ error: "Método não permitido" });
 
